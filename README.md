@@ -4,8 +4,11 @@ An independent, interactive Meta AR-glasses strategy by Tamerlan Goglichidze for
 
 ## Contents
 
-- Black Wayfarer-style Three.js concept glasses, a separately positioned optional control ring, and an automatic staggered spatial-screen reveal
-- Animated illustrative workspace, grocery-shopping, and daily-assistant demos
+- Black Wayfarer-style Three.js concept glasses, a separate control ring, and one expanding panoramic AR scene with a manual aperture slider
+- A playable workspace with draggable, resizable windows, keyboard controls, focus mode, a scratchpad, and an actual sample brief
+- A two-item grocery simulation with variety checks, replacement review, explicit simulated customer approval, and restart
+- A simulated 3D ring: thumb-scroll to choose an action and click to confirm it
+- An opt-in, rule-based assistant demonstration with editable tab-only preferences and a clear-memory control
 - Fingertip screen-scaling demonstration with keyboard-accessible size control
 - BLS employment-growth chart, Instacart active-shopper figure, and historical DHL pilot evidence
 - Nanophotonics explainer with a not-to-scale optical-layer diagram
@@ -15,6 +18,8 @@ An independent, interactive Meta AR-glasses strategy by Tamerlan Goglichidze for
 - Responsive layouts and reduced-motion support
 
 The narrative and all demonstrations are proposals, not Meta product specifications. The experience requests no camera, microphone, or tracking permissions. No analytics or account connections are included.
+
+The assistant is a deterministic simulation, not a live AI service. Its preferences and the scratchpad exist only in the current tab, never in local storage or a backend. Shopper progress counts demo items, not measured productivity. Run the state tests with `node --test test/playground-state.test.js`.
 
 ## Run
 

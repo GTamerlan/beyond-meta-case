@@ -36,7 +36,7 @@ export function initGlasses() {
   function resize() {
     const w=host.clientWidth, h=host.clientHeight;
     renderer.setSize(w,h,false); camera.aspect=w/h;
-    camera.position.set(0,.65,Math.max(12.8,11.8/(2*Math.tan(Math.PI/12)*camera.aspect))); camera.lookAt(0,0,-.4); camera.updateProjectionMatrix(); render();
+    camera.position.set(0,.65,Math.max(9.8,11.8/(2*Math.tan(Math.PI/12)*camera.aspect))); camera.lookAt(0,0,-.4); camera.updateProjectionMatrix(); render();
   }
   function render(t = performance.now()) {
     if (contextLost) return;
