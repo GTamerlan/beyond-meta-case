@@ -26,10 +26,11 @@ export function initGlasses() {
   const glasses = createGlasses(THREE);
   scene.add(glasses);
   const ring = createRing(THREE);
-  ring.position.set(3.65, -1.32, 1.25);
+  ring.position.set(5.3, -1.6, .45);
   ring.rotation.set(.35, -.4, -.2);
-  ring.scale.setScalar(1.05);
+  ring.scale.setScalar(.82);
   scene.add(ring);
+  const born = performance.now();
   const camera = new THREE.PerspectiveCamera(30, 1, .1, 60);
   let yaw = -.22, pitch = .25, targetYaw = yaw, targetPitch = pitch, visible = true, dragging = false, lastX = 0, lastY = 0, raf = 0, expansion = 0;
   const hero = document.querySelector('.hero');
@@ -37,18 +38,19 @@ export function initGlasses() {
   function resize() {
     const w=host.clientWidth, h=host.clientHeight;
     renderer.setSize(w,h,false); camera.aspect=w/h;
-    camera.position.set(0,1.1,w < 650 ? 16 : 14.2); camera.lookAt(0,.4,-.4); camera.updateProjectionMatrix(); render();
+    camera.position.set(0,1.15,Math.max(14.6,14.2/(2*Math.tan(Math.PI/12)*camera.aspect))); camera.lookAt(0,.4,-.4); camera.updateProjectionMatrix(); render();
   }
-  function render(t = 0) {
+  function render(t = performance.now()) {
     yaw += (targetYaw-yaw)*.09; pitch += (targetPitch-pitch)*.09;
     const targetExpansion = Number(hero.dataset.expansion || 0);
     expansion = reduced.matches ? targetExpansion : THREE.MathUtils.lerp(expansion,targetExpansion,.055);
-    glasses.rotation.set(pitch - expansion*.16, yaw + (reduced.matches || dragging ? 0 : Math.sin(t*.0003)*.055) + expansion*.22, -.04 + expansion*.04);
-    glasses.position.y = -expansion*1.42 + (reduced.matches ? 0 : Math.sin(t*.00065)*.055);
-    glasses.scale.setScalar(1.18-expansion*.3);
+    const arrival = reduced.matches ? 1 : THREE.MathUtils.smoothstep(t-born,0,1400);
+    glasses.rotation.set(pitch - expansion*.14 + (1-arrival)*.16, yaw + (reduced.matches || dragging ? 0 : Math.sin(t*.0003)*.035) + expansion*.16 - (1-arrival)*.3, -.04 + expansion*.03);
+    glasses.position.set(-.55,-expansion*1.35 - (1-arrival)*.25 + (reduced.matches ? 0 : Math.sin(t*.00065)*.045),0);
+    glasses.scale.setScalar(1.1-expansion*.12);
     updateHolograms(expansion,t,reduced.matches);
     ring.rotation.y = -.4 + (reduced.matches ? 0 : Math.sin(t*.00045)*.16);
-    ring.position.y = -1.32 - expansion*.33 + (reduced.matches ? 0 : Math.sin(t*.00065+1.5)*.065);
+    ring.position.y = -1.6 - expansion*.06 + (reduced.matches ? 0 : Math.sin(t*.00065+1.5)*.065);
     renderer.render(scene,camera);
   }
   function frame(t) { render(t); if(visible && !document.hidden && !reduced.matches) raf=requestAnimationFrame(frame); else raf=0; }
@@ -67,4 +69,5 @@ export function initGlasses() {
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();host.classList.add('no-webgl');});
   document.querySelector('.model-loader').classList.add('loaded');
   host.classList.add('model-ready');resize();start();
+  dispatchEvent(new Event('beyond:scene-ready'));
 }

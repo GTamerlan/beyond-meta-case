@@ -10,3 +10,12 @@
 @media(max-height:740px){.hero-scroll .hero{min-height:0}.hero-scroll .hero-topline{top:107px}.hero-scroll .hero h1{padding-top:150px;font-size:clamp(37px,6vw,64px)}.hero-scroll .hero-stage{inset:240px 0 108px}.unfold-copy{top:150px}.unfold-copy h2{font-size:clamp(32px,4.7vw,52px)}.hero-scroll .hero-footer{bottom:53px}.hero-footer p{font-size:14px}.hero-scroll .hero-cta{padding:10px 18px}.scene-chapters{bottom:16px}}
 @media(max-height:740px) and (max-width:760px){.hero-scroll .hero h1{font-size:35px;padding-top:155px}.hero-scroll .hero-topline{top:105px;font-size:12px}.hero-scroll .hero-stage{inset:238px -18% 120px}.hero-scroll .hero-footer{bottom:47px;gap:10px;grid-template-columns:1fr auto;align-items:center}.hero-scroll .hero-footer p{font-size:12px;max-width:165px}.hero-scroll .hero-cta{font-size:12px;padding:10px 13px;gap:8px;max-width:165px}.hero-scroll .hero-cta span{font-size:18px}.unfold-copy{top:153px}.unfold-copy h2{font-size:30px}.scene-chapters{bottom:16px;font-size:12px}}
 @media(max-width:760px){.segmented button{padding:9px 11px;font-size:13px;gap:6px}.segmented svg{width:14px;height:14px}.segmented{gap:2px}.world-demo[data-mode=shopper] .document-content h3{font-size:27px}.scene-chapters{font-size:12px}.hero-scroll .model-note{display:none}}
+/* The intro plays once; readers can replay it without scrolling. */
+.hero-stage.model-ready canvas{animation:product-arrival 1.35s cubic-bezier(.2,.7,.15,1) both}
+@keyframes product-arrival{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.hero-scroll .hero-cta{white-space:nowrap}.hero-scroll .hero-cta span{font-size:21px}
+.hero[data-intro=playing] .hero-cta{background:#dceaff}
+@media(max-height:740px) and (max-width:760px){.hero-scroll .hero-cta{font-size:12px;gap:6px;padding:10px 11px;max-width:none}}
+@media(prefers-reduced-motion:reduce){.hero-stage.model-ready canvas{animation:none;opacity:1;transform:none}}
+.hero-scroll{height:145svh}@media(max-width:760px){.hero-scroll{height:140svh}}@media(prefers-reduced-motion:reduce){.hero-scroll{height:auto}}
+@media(min-width:761px) and (min-height:741px){.hero-scroll .hero-stage{top:320px}.unfold-copy h2{font-size:clamp(42px,4.6vw,68px)}}
