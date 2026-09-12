@@ -4,8 +4,11 @@ An independent, interactive Meta AR-glasses strategy by Tamerlan Goglichidze for
 
 ## Contents
 
-- Original interactive Three.js glasses and optional control-ring concept
-- Animated illustrative spatial-workspace and daily-assistant demos
+- Slim titanium-style Three.js glasses, optional control ring, and scroll-driven spatial-screen reveal
+- Animated illustrative workspace, grocery-shopping, and daily-assistant demos
+- Fingertip screen-scaling demonstration with keyboard-accessible size control
+- BLS employment-growth chart, Instacart active-shopper figure, and historical DHL pilot evidence
+- Nanophotonics explainer with an animated, not-to-scale optical-layer diagram
 - Gaze, gesture, ring, and voice interaction concepts
 - Two proposed launch segments and a gated five-year roadmap
 - A sub-800-word consulting proposal with dated primary-source links
@@ -33,3 +36,5 @@ Static output is in `dist/`. Relative asset paths support GitHub Pages project U
 Dated research is recorded in `src/sources.js`. The full proposal is in `src/brief.md`. The 3D geometry is original procedural work. Environment photographs are AI-generated illustrations, not evidence of real products or people using AR.
 
 Research reviewed September 12, 2026.
+
+New image assets were generated with the built-in image tool: `public/pinch-hand.png` (single right-hand pinch, transparent background, warm skin and cool rim light) and `public/grocery.jpg` (first-person grocery aisle, apples and greens left, partial cart right, no people or UI). The conceptual spatial panels depict what a wearer could see; the glasses are not represented as projecting visible images into free space.

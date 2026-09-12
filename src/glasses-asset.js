@@ -1,153 +1,160 @@
 /**
- * Procedural, unbranded smart sunglasses. All dimensions are in arbitrary units.
- * Front faces +Z; temples extend toward -Z. No textures or external assets.
- * Parts and materials are exposed in group.userData for presentation animation.
+ * Slim titanium AR eyewear concept. The geometry is a visual design, not a
+ * representation of a validated optical or electronics package.
+ * Front +Z, temples -Z, overall front width approximately 7 units.
  */
 export function createGlasses(THREE) {
   const glasses = new THREE.Group();
-  glasses.name = 'smart-sunglasses';
+  glasses.name = 'slim-titanium-glasses';
 
   const materials = {
     frame: new THREE.MeshPhysicalMaterial({
-      color: 0x101318, metalness: 0.24, roughness: 0.24,
-      clearcoat: 1, clearcoatRoughness: 0.18, envMapIntensity: 1.25,
-    }),
-    satin: new THREE.MeshPhysicalMaterial({
-      color: 0x171b21, metalness: 0.18, roughness: 0.33,
-      clearcoat: 0.55, clearcoatRoughness: 0.28,
-    }),
-    rubber: new THREE.MeshStandardMaterial({
-      color: 0x080b0f, roughness: 0.46, metalness: 0.08,
+      color: 0x81949e, metalness: 0.92, roughness: 0.22,
+      clearcoat: 0.3, clearcoatRoughness: 0.18, envMapIntensity: 1.4,
     }),
     lens: new THREE.MeshPhysicalMaterial({
-      color: 0x263f52, metalness: 0.32, roughness: 0.16,
-      transparent: true, opacity: 0.85, depthWrite: false,
-      clearcoat: 1, clearcoatRoughness: 0.12,
-      reflectivity: 0.92, envMapIntensity: 1.35,
-      side: THREE.DoubleSide,
+      color: 0xbadce8, metalness: 0.02, roughness: 0.075,
+      transparent: true, opacity: 0.17, depthWrite: false,
+      clearcoat: 1, clearcoatRoughness: 0.06,
+      reflectivity: 0.35, envMapIntensity: 0.62,
+      iridescence: 0.09, iridescenceIOR: 1.3,
+      iridescenceThicknessRange: [140, 230], side: THREE.DoubleSide,
     }),
-    metal: new THREE.MeshStandardMaterial({
-      color: 0xa7b1ba, metalness: 0.88, roughness: 0.23,
+    polished: new THREE.MeshStandardMaterial({
+      color: 0xc0ccd0, metalness: 0.97, roughness: 0.17,
+      envMapIntensity: 1.15,
     }),
-    darkMetal: new THREE.MeshStandardMaterial({
-      color: 0x3b4650, metalness: 0.8, roughness: 0.26,
+    satin: new THREE.MeshStandardMaterial({
+      color: 0x45525b, metalness: 0.7, roughness: 0.29,
     }),
-    camera: new THREE.MeshPhysicalMaterial({
-      color: 0x07141b, metalness: 0.43, roughness: 0.11,
-      clearcoat: 1, clearcoatRoughness: 0.08,
+    tips: new THREE.MeshPhysicalMaterial({
+      color: 0x48545b, metalness: 0.12, roughness: 0.36,
+      clearcoat: 0.3, clearcoatRoughness: 0.28,
     }),
-    iris: new THREE.MeshPhysicalMaterial({
-      color: 0x203d58, metalness: 0.45, roughness: 0.13,
-      iridescence: 1, iridescenceIOR: 1.32,
-      iridescenceThicknessRange: [180, 360], clearcoat: 1,
+    pads: new THREE.MeshPhysicalMaterial({
+      color: 0xc5d6dc, metalness: 0, roughness: 0.22,
+      transparent: true, opacity: 0.45, depthWrite: false,
+      clearcoat: 0.5, side: THREE.DoubleSide,
     }),
-    glint: new THREE.MeshBasicMaterial({
-      color: 0xb9e5fa, transparent: true, opacity: 0.62,
+    optical: new THREE.MeshPhysicalMaterial({
+      color: 0x162a36, metalness: 0.35, roughness: 0.1,
+      clearcoat: 1, iridescence: 0.65,
+      iridescenceThicknessRange: [170, 280],
     }),
-    indicator: new THREE.MeshBasicMaterial({ color: 0xb9e3d2 }),
   };
 
   function mesh(geometry, material, name, parent = glasses) {
     const object = new THREE.Mesh(geometry, material);
     object.name = name;
-    object.castShadow = material !== materials.lens;
+    object.castShadow = !material.transparent;
     object.receiveShadow = true;
     parent.add(object);
     return object;
   }
 
-  // A flatter brow and a tapered, soft-square lower rim give the frame its
-  // wayfarer silhouette. Coordinates describe the right half of the front.
-  function outerContour(path) {
-    path.moveTo(0.36, 0.69);
-    path.bezierCurveTo(0.37, 0.95, 0.52, 1.06, 0.86, 1.07);
-    path.bezierCurveTo(1.51, 1.10, 2.56, 1.07, 3.03, 1.00);
-    path.bezierCurveTo(3.32, 0.97, 3.44, 0.86, 3.39, 0.58);
-    path.bezierCurveTo(3.33, 0.13, 3.20, -0.51, 3.02, -0.79);
-    path.bezierCurveTo(2.88, -1.00, 2.64, -1.04, 2.28, -1.04);
-    path.lineTo(1.09, -1.00);
-    path.bezierCurveTo(0.80, -0.98, 0.65, -0.85, 0.58, -0.56);
-    path.bezierCurveTo(0.51, -0.23, 0.37, 0.40, 0.36, 0.69);
-    path.closePath();
-    return path;
+  // The frame gently wraps away from the face at the outer corners.
+  const faceZ = x => -0.019 * Math.pow(Math.max(0, Math.abs(x) - 0.35), 2);
+  const vector = (x, y, z = faceZ(x)) => new THREE.Vector3(x, y, z);
+
+  function lensShape() {
+    const shape = new THREE.Shape();
+    shape.moveTo(0.76, 0.86);
+    shape.bezierCurveTo(0.49, 0.86, 0.36, 0.72, 0.36, 0.47);
+    shape.lineTo(0.37, -0.47);
+    shape.bezierCurveTo(0.37, -0.73, 0.52, -0.87, 0.80, -0.88);
+    shape.bezierCurveTo(1.39, -0.90, 2.21, -0.90, 2.77, -0.87);
+    shape.bezierCurveTo(3.07, -0.85, 3.25, -0.71, 3.27, -0.43);
+    shape.lineTo(3.30, 0.45);
+    shape.bezierCurveTo(3.31, 0.72, 3.15, 0.87, 2.87, 0.88);
+    shape.bezierCurveTo(2.24, 0.90, 1.40, 0.89, 0.76, 0.86);
+    shape.closePath();
+    return shape;
   }
 
-  function lensContour(path) {
-    path.moveTo(0.67, 0.61);
-    path.bezierCurveTo(0.66, 0.77, 0.77, 0.82, 0.96, 0.83);
-    path.bezierCurveTo(1.65, 0.86, 2.39, 0.83, 2.82, 0.78);
-    path.bezierCurveTo(3.02, 0.76, 3.11, 0.68, 3.07, 0.50);
-    path.bezierCurveTo(3.00, 0.09, 2.92, -0.39, 2.78, -0.60);
-    path.bezierCurveTo(2.68, -0.75, 2.51, -0.77, 2.25, -0.77);
-    path.lineTo(1.17, -0.73);
-    path.bezierCurveTo(0.98, -0.72, 0.88, -0.64, 0.83, -0.44);
-    path.bezierCurveTo(0.77, -0.14, 0.68, 0.37, 0.67, 0.61);
-    path.closePath();
-    return path;
-  }
+  const shape = lensShape();
+  const contour = shape.getSpacedPoints(160).slice(0, -1);
+  const rimCurve = new THREE.CatmullRomCurve3(
+    contour.map(point => vector(point.x, point.y)), true, 'centripetal',
+  );
 
+  // Precision wire rims are dramatically slimmer than an acetate silhouette.
   const rightFront = new THREE.Group();
   rightFront.name = 'right-front';
   glasses.add(rightFront);
-  const rimShape = outerContour(new THREE.Shape());
-  rimShape.holes.push(lensContour(new THREE.Path()));
-  const rimGeometry = new THREE.ExtrudeGeometry(rimShape, {
-    depth: 0.265, steps: 1, curveSegments: 20,
-    bevelEnabled: true, bevelThickness: 0.05,
-    bevelSize: 0.047, bevelSegments: 4,
-  });
-  const rightRim = mesh(rimGeometry, materials.frame, 'right-rim', rightFront);
-  rightRim.position.z = -0.115;
+  const rightRim = mesh(
+    new THREE.TubeGeometry(rimCurve, 160, 0.032, 10, true),
+    materials.frame, 'right-rim', rightFront,
+  );
 
-  // The glass has a subtle convex face. Its opaque tint and clearcoat work
-  // with a studio environment without relying on costly scene transmission.
-  const lensGeometry = new THREE.ExtrudeGeometry(lensContour(new THREE.Shape()), {
-    depth: 0.036, steps: 1, curveSegments: 24,
-    bevelEnabled: true, bevelThickness: 0.013,
-    bevelSize: 0.014, bevelSegments: 3,
-  });
-  const lensPosition = lensGeometry.attributes.position;
-  for (let i = 0; i < lensPosition.count; i++) {
-    const x = (lensPosition.getX(i) - 1.84) / 1.29;
-    const y = (lensPosition.getY(i) - 0.045) / 0.84;
-    const bow = 0.055 * Math.max(0, 1 - x * x) * Math.max(0, 1 - y * y);
-    lensPosition.setZ(i, lensPosition.getZ(i) + bow);
+  // A smooth indexed lens surface has a very small optical bow and no expensive
+  // transmission pass. Its transparent pale tint lets the fine rear arms show.
+  function createLensGeometry() {
+    const center = new THREE.Vector2(1.82, 0.0);
+    const vertices = [center.x, center.y, faceZ(center.x) + 0.033];
+    const indices = [];
+    const segments = contour.length;
+    const rings = 9;
+    for (let row = 1; row <= rings; row++) {
+      const radius = (row / rings) * 0.989;
+      for (let j = 0; j < segments; j++) {
+        const x = center.x + (contour[j].x - center.x) * radius;
+        const y = center.y + (contour[j].y - center.y) * radius;
+        vertices.push(x, y, faceZ(x) + 0.003 + 0.03 * (1 - radius * radius));
+      }
+    }
+    for (let j = 0; j < segments; j++) {
+      const next = (j + 1) % segments;
+      indices.push(0, 1 + j, 1 + next);
+    }
+    for (let row = 0; row < rings - 1; row++) {
+      const start = 1 + row * segments;
+      const after = start + segments;
+      for (let j = 0; j < segments; j++) {
+        const next = (j + 1) % segments;
+        indices.push(start + j, after + j, after + next);
+        indices.push(start + j, after + next, start + next);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
   }
-  lensGeometry.computeVertexNormals();
-  const rightLens = mesh(lensGeometry, materials.lens, 'right-lens', rightFront);
-  rightLens.position.z = 0.06;
+  const rightLens = mesh(createLensGeometry(), materials.lens, 'right-lens', rightFront);
   rightLens.renderOrder = 2;
 
-  function frontCylinder(radius, depth, material, name, x, y, z, parent) {
-    const object = mesh(new THREE.CylinderGeometry(radius, radius, depth, 32), material, name, parent);
-    object.rotation.x = Math.PI / 2;
-    object.position.set(x, y, z);
-    return object;
+  function tube(points, radius, material, name, parent = glasses, segments = 32) {
+    const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal');
+    return mesh(new THREE.TubeGeometry(curve, segments, radius, 10, false), material, name, parent);
   }
 
-  function cameraModule(parent, x, y) {
-    const camera = new THREE.Group();
-    camera.name = 'optical-camera';
-    parent.add(camera);
-    frontCylinder(0.135, 0.035, materials.rubber, 'camera-recess', x, y, 0.2, camera);
-    frontCylinder(0.112, 0.031, materials.darkMetal, 'camera-barrel', x, y, 0.225, camera);
-    const ring = mesh(new THREE.TorusGeometry(0.096, 0.010, 8, 40), materials.metal, 'camera-ring', camera);
-    ring.position.set(x, y, 0.245);
-    frontCylinder(0.086, 0.011, materials.camera, 'camera-glass', x, y, 0.248, camera);
-    frontCylinder(0.057, 0.006, materials.iris, 'camera-iris', x, y, 0.257, camera);
-    frontCylinder(0.027, 0.007, materials.camera, 'camera-pupil', x, y, 0.263, camera);
-    const glint = mesh(new THREE.SphereGeometry(0.014, 12, 8), materials.glint, 'camera-glint', camera);
-    glint.scale.set(1.25, 0.55, 0.18);
-    glint.position.set(x - 0.025, y + 0.034, 0.271);
-    return camera;
-  }
+  // One fine arched bridge is deliberately lighter than the lens rims.
+  const bridgeCurve = new THREE.CubicBezierCurve3(
+    vector(-0.38, 0.34, 0.006), vector(-0.19, 0.56, 0.021),
+    vector(0.19, 0.56, 0.021), vector(0.38, 0.34, 0.006),
+  );
+  const bridge = mesh(
+    new THREE.TubeGeometry(bridgeCurve, 36, 0.031, 10, false),
+    materials.frame, 'titanium-bridge',
+  );
 
-  cameraModule(rightFront, 3.20, 0.73);
+  // A tiny machined endpiece connects each rounded lens rim to its hinge.
+  const rightEndpiece = tube([
+    vector(3.27, 0.55), vector(3.36, 0.56, -0.165),
+    vector(3.43, 0.55, -0.23),
+  ], 0.047, materials.frame, 'right-endpiece', rightFront, 20);
+  const endpieceCap = mesh(new THREE.SphereGeometry(1, 20, 12), materials.frame, 'sensor-endpiece', rightFront);
+  endpieceCap.position.set(3.335, 0.555, -0.142);
+  endpieceCap.scale.set(0.081, 0.053, 0.03);
 
-  // Subtle brow pins are separate geometry, so reflections remain crisp.
-  for (const x of [2.77, 2.89]) {
-    frontCylinder(0.022, 0.012, materials.metal, 'brow-pin', x, 0.92, 0.201, rightFront);
-  }
+  // The small camera reads as a discreet inset, not a protruding camera barrel.
+  const optic = mesh(new THREE.CircleGeometry(0.025, 28), materials.optical, 'inset-camera', rightFront);
+  optic.position.set(3.337, 0.556, -0.108);
+  const opticalRing = mesh(new THREE.TorusGeometry(0.028, 0.004, 6, 28), materials.polished, 'camera-lip', rightFront);
+  opticalRing.position.copy(optic.position);
+  opticalRing.position.z += 0.002;
+
   const leftFront = rightFront.clone(true);
   leftFront.name = 'left-front';
   leftFront.scale.x = -1;
@@ -155,125 +162,126 @@ export function createGlasses(THREE) {
   const leftLens = leftFront.getObjectByName('right-lens');
   leftLens.name = 'left-lens';
   leftFront.getObjectByName('right-rim').name = 'left-rim';
+  leftFront.getObjectByName('right-endpiece').name = 'left-endpiece';
+  // Only one visible optical inset keeps the front exceptionally clean.
+  leftFront.remove(leftFront.getObjectByName('inset-camera'));
+  leftFront.remove(leftFront.getObjectByName('camera-lip'));
 
-  // A continuous sculpted bridge leaves the natural inverted-U nose opening.
-  const bridgeShape = new THREE.Shape();
-  bridgeShape.moveTo(-0.59, 0.77);
-  bridgeShape.bezierCurveTo(-0.29, 0.93, 0.29, 0.93, 0.59, 0.77);
-  bridgeShape.lineTo(0.58, 0.46);
-  bridgeShape.bezierCurveTo(0.26, 0.66, -0.26, 0.66, -0.58, 0.46);
-  bridgeShape.closePath();
-  const bridge = mesh(new THREE.ExtrudeGeometry(bridgeShape, {
-    depth: 0.245, steps: 1, curveSegments: 24,
-    bevelEnabled: true, bevelThickness: 0.055,
-    bevelSize: 0.049, bevelSegments: 4,
-  }), materials.frame, 'bridge');
-  bridge.position.z = -0.11;
-
-  // Integrated rear nose supports are soft ellipsoids, tucked behind the rim.
   for (const side of [-1, 1]) {
-    const nose = mesh(new THREE.SphereGeometry(1, 24, 16), materials.satin, `nose-support-${side}`);
-    nose.position.set(side * 0.56, -0.01, -0.19);
-    nose.scale.set(0.115, 0.32, 0.18);
-    nose.rotation.z = side * 0.2;
+    tube([
+      vector(side * 0.37, 0.07, -0.012),
+      vector(side * 0.33, -0.08, -0.12),
+      vector(side * 0.31, -0.20, -0.18),
+    ], 0.014, materials.polished, `nose-pad-arm-${side}`, glasses, 18);
+    const pad = mesh(new THREE.SphereGeometry(1, 20, 14), materials.pads, `clear-nose-pad-${side}`);
+    pad.scale.set(0.059, 0.157, 0.038);
+    pad.position.set(side * 0.315, -0.235, -0.185);
+    pad.rotation.z = side * 0.22;
+    pad.rotation.y = side * 0.24;
+    pad.renderOrder = 1;
+  }
+
+  // Rounded rectangular arm sections retain a slim machined profile from every
+  // angle, instead of turning into bulky side panels when the product rotates.
+  function sweptArm(curve, halfWidth, halfHeight, lengthSteps = 66) {
+    const radialSteps = 12;
+    const positions = [];
+    const indices = [];
+    const up = vector(0, 1, 0);
+    const horizontal = new THREE.Vector3();
+    const vertical = new THREE.Vector3();
+    for (let i = 0; i <= lengthSteps; i++) {
+      const t = i / lengthSteps;
+      const point = curve.getPoint(t);
+      const tangent = curve.getTangent(t).normalize();
+      horizontal.crossVectors(tangent, up).normalize();
+      vertical.crossVectors(horizontal, tangent).normalize();
+      const width = halfWidth(t);
+      const height = halfHeight(t);
+      for (let j = 0; j < radialSteps; j++) {
+        const angle = j * Math.PI * 2 / radialSteps;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const x = Math.sign(cos) * Math.pow(Math.abs(cos), 0.65) * width;
+        const y = Math.sign(sin) * Math.pow(Math.abs(sin), 0.65) * height;
+        positions.push(
+          point.x + horizontal.x * x + vertical.x * y,
+          point.y + horizontal.y * x + vertical.y * y,
+          point.z + horizontal.z * x + vertical.z * y,
+        );
+      }
+    }
+    for (let i = 0; i < lengthSteps; i++) {
+      for (let j = 0; j < radialSteps; j++) {
+        const next = (j + 1) % radialSteps;
+        const a = i * radialSteps + j;
+        const b = (i + 1) * radialSteps + j;
+        const c = (i + 1) * radialSteps + next;
+        const d = i * radialSteps + next;
+        indices.push(a, b, d, b, c, d);
+      }
+    }
+    for (const end of [0, lengthSteps]) {
+      const point = curve.getPoint(end / lengthSteps);
+      const centerIndex = positions.length / 3;
+      positions.push(point.x, point.y, point.z);
+      for (let j = 0; j < radialSteps; j++) {
+        const a = end * radialSteps + j;
+        const b = end * radialSteps + (j + 1) % radialSteps;
+        if (end === 0) indices.push(centerIndex, a, b);
+        else indices.push(centerIndex, b, a);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
   }
 
   const rightTemple = new THREE.Group();
   rightTemple.name = 'right-temple';
   glasses.add(rightTemple);
+  const armCurve = new THREE.CatmullRomCurve3([
+    vector(3.425, 0.548, -0.238), vector(3.474, 0.533, -0.55),
+    vector(3.457, 0.49, -1.25), vector(3.355, 0.43, -2.12),
+    vector(3.218, 0.338, -2.87), vector(3.084, 0.095, -3.46),
+    vector(3.002, -0.10, -3.77),
+  ], false, 'centripetal');
+  mesh(sweptArm(
+    armCurve, t => 0.033 - 0.011 * t,
+    t => 0.064 - 0.035 * t,
+  ), materials.frame, 'fine-titanium-temple', rightTemple);
 
-  // Model the entire arm as a bevelled side silhouette, then bend it inward
-  // toward the ear. The electronics housing transitions into a slender tip.
-  const armShape = new THREE.Shape();
-  armShape.moveTo(0.025, 0.82);
-  armShape.bezierCurveTo(0.20, 0.93, 0.56, 0.90, 0.96, 0.86);
-  armShape.bezierCurveTo(1.49, 0.82, 1.89, 0.72, 2.19, 0.62);
-  armShape.bezierCurveTo(2.48, 0.53, 2.76, 0.51, 2.98, 0.36);
-  armShape.bezierCurveTo(3.24, 0.17, 3.43, -0.09, 3.52, -0.33);
-  armShape.bezierCurveTo(3.57, -0.47, 3.48, -0.56, 3.39, -0.47);
-  armShape.bezierCurveTo(3.16, -0.19, 3.02, 0.01, 2.82, 0.09);
-  armShape.bezierCurveTo(2.57, 0.20, 2.38, 0.20, 2.15, 0.19);
-  armShape.bezierCurveTo(1.61, 0.17, 1.15, 0.22, 0.71, 0.27);
-  armShape.bezierCurveTo(0.35, 0.30, 0.11, 0.35, 0.025, 0.43);
-  armShape.closePath();
+  // A short, soft ear tip follows the same curve and stays visually slender.
+  const tipCurve = new THREE.CatmullRomCurve3([
+    armCurve.getPoint(0.77), armCurve.getPoint(0.84),
+    armCurve.getPoint(0.92), armCurve.getPoint(1),
+  ], false, 'centripetal');
+  mesh(sweptArm(tipCurve, () => 0.030, t => 0.043 - 0.006 * t, 26), materials.tips, 'soft-ear-tip', rightTemple);
 
-  function inwardBend(distance) {
-    return -0.092 * Math.pow(Math.max(0, distance - 1.23), 2);
+  const hinge = mesh(new THREE.CylinderGeometry(0.041, 0.041, 0.13, 24), materials.satin, 'micro-hinge', rightTemple);
+  hinge.position.set(3.429, 0.547, -0.264);
+  for (const y of [0.481, 0.613]) {
+    const screw = mesh(new THREE.CylinderGeometry(0.024, 0.024, 0.006, 20), materials.polished, 'hinge-pin', rightTemple);
+    screw.position.set(3.429, y, -0.264);
   }
-
-  function armGeometry(shape, depth, bevelSize = 0.045) {
-    const geometry = new THREE.ExtrudeGeometry(shape, {
-      depth, steps: 1, curveSegments: 20,
-      bevelEnabled: true, bevelThickness: bevelSize,
-      bevelSize, bevelSegments: 4,
-    });
-    const position = geometry.attributes.position;
-    for (let i = 0; i < position.count; i++) {
-      const distance = position.getX(i);
-      const y = position.getY(i);
-      const thickness = position.getZ(i);
-      position.setXYZ(i, 3.19 + thickness + inwardBend(distance), y, -distance - 0.07);
-    }
-    geometry.computeVertexNormals();
-    return geometry;
-  }
-  const arm = mesh(armGeometry(armShape, 0.27, 0.058), materials.frame, 'sculpted-arm', rightTemple);
-
-  // A flush control surface sits on the broad outer housing, with a fine seam.
-  const panelShape = new THREE.Shape();
-  panelShape.moveTo(0.61, 0.73);
-  panelShape.bezierCurveTo(0.75, 0.78, 1.25, 0.73, 1.64, 0.64);
-  panelShape.bezierCurveTo(1.77, 0.61, 1.78, 0.40, 1.62, 0.36);
-  panelShape.bezierCurveTo(1.18, 0.34, 0.82, 0.37, 0.63, 0.41);
-  panelShape.bezierCurveTo(0.54, 0.44, 0.53, 0.69, 0.61, 0.73);
-  panelShape.closePath();
-  const control = mesh(armGeometry(panelShape, 0.008, 0.017), materials.satin, 'touch-panel', rightTemple);
-  control.position.x = 0.274;
-
-  // Cylinders are oriented along X on the temple's external side.
-  function sideCylinder(radius, depth, material, name, distance, y, parent, outer = 3.492) {
-    const object = mesh(new THREE.CylinderGeometry(radius, radius, depth, 24), material, name, parent);
-    object.rotation.z = Math.PI / 2;
-    object.position.set(outer + inwardBend(distance), y, -distance - 0.07);
-    return object;
-  }
-  sideCylinder(0.085, 0.021, materials.darkMetal, 'hinge-seat', 0.25, 0.64, rightTemple);
-  sideCylinder(0.052, 0.025, materials.metal, 'hinge-screw', 0.25, 0.64, rightTemple);
-  const screwSlot = mesh(new THREE.BoxGeometry(0.006, 0.011, 0.059), materials.rubber, 'hinge-screw-slot', rightTemple);
-  screwSlot.position.set(3.507, 0.64, -0.32);
-  screwSlot.rotation.x = -0.45;
-
-  // The hinge is visible from above and from the interior of the frame.
-  const hinge = mesh(new THREE.CylinderGeometry(0.091, 0.091, 0.38, 24), materials.darkMetal, 'hinge-barrel', rightTemple);
-  hinge.position.set(3.24, 0.60, -0.17);
-  for (const y of [0.44, 0.60, 0.76]) {
-    const knuckle = mesh(new THREE.TorusGeometry(0.092, 0.009, 6, 24), materials.metal, 'hinge-knuckle', rightTemple);
-    knuckle.rotation.x = Math.PI / 2;
-    knuckle.position.set(3.24, y, -0.17);
-  }
-
-  // Tiny speaker apertures on the underside and a microphone on the side.
-  for (let i = 0; i < 5; i++) {
-    const d = 1.88 + i * 0.078;
-    sideCylinder(0.018, 0.008, materials.rubber, 'speaker-port', d, 0.305, rightTemple, 3.484);
-  }
-  sideCylinder(0.025, 0.009, materials.rubber, 'microphone-port', 0.47, 0.58, rightTemple, 3.488);
 
   const leftTemple = rightTemple.clone(true);
   leftTemple.name = 'left-temple';
   leftTemple.scale.x = -1;
   glasses.add(leftTemple);
 
-  // One understated status indicator; the other camera remains symmetrical.
-  frontCylinder(0.012, 0.009, materials.indicator, 'status-light', -3.13, 0.46, 0.205, glasses);
-
-  glasses.userData.parts = {
-    rightFront, leftFront, rightLens, leftLens,
-    rightTemple, leftTemple, bridge,
-  };
+  const parts = { rightFront, leftFront, rightLens, leftLens, rightRim,
+    leftRim: leftFront.getObjectByName('left-rim'), rightTemple, leftTemple,
+    bridge, rightEndpiece };
+  glasses.userData.parts = parts;
   glasses.userData.materials = materials;
   glasses.userData.frontDirection = '+Z';
-  glasses.userData.dimensions = { width: 7.04, height: 2.21, depth: 3.99 };
+  glasses.userData.dimensions = { width: 7.04, height: 1.87, depth: 3.86 };
+  // Preserve both the existing scene API and a direct material alias.
+  glasses.materials = materials;
+  glasses.parts = parts;
   return glasses;
 }
 
