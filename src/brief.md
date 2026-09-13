@@ -1,37 +1,47 @@
-# Beyond the Screen: Put the Digital World Where Life Happens
+# Work, Hands-Free
 
-## Executive summary
+## Proposal
 
-The smartphone put the world in our hands. Glasses can put it back around us: the right product on a shelf, the next turn on a street, a workspace wherever we sit. Meta should pursue that five-year AR ambition by first winning frequent independent grocery shoppers as individual buyers. Three initiatives can establish the foundation: complete one valuable workflow, build comfortable glasses with natural controls, and make their benefit affordable to experience. Broader adoption should follow demonstrated usefulness.
+Before any purchase, we ask “What do I get?” One of the main reasons we are willing to spend hundreds on devices is the work it enables us to do. A MacBook for design, an iPad for note taking and an iPhone for video recording. However, grocery and food delivery workers often need their hands while using their phones for guidance. Sometimes that gets “unhandy” if not impossible. But what if workers could follow these instructions on the phone but not have to hold it?
 
-## Hypothesis: everyday value will unlock the next buyer
+Meta should implement an adaptive work interface that allows approved task information from partner apps to be displayed on their glasses. First begin with independent grocery and food delivery workers who complete orders several days a week. Win these workers as individual customers by making their current work easier.
 
-Our hypothesis is that adoption beyond enthusiasts depends on recurring utility worth the price. The [Vision Council (September 12, 2025)](https://thevisioncouncil.org/blog/latest-report-vision-council-shows-rising-awareness-smart-eyewear-recent-years) identifies unclear purpose and cost as purchase deterrents. Interview nonbuyers and trial users to test this against discomfort, privacy, and prescription fit; no interviews have yet been conducted for this proposal.
+## Market
 
-Prioritize shoppers fulfilling orders several days weekly: repeated trips create repeated opportunities to keep both hands working. Instacart reported approximately [600,000 monthly active shoppers in December 2025 (February 26, 2026 filing)](https://www.sec.gov/Archives/edgar/data/1579091/000157909126000018/cart-20251231.htm). Frequent shoppers are a subset, and platform reach does not establish demand. They must voluntarily choose to buy because glasses improve their own working day.
+From the initial research, early adopters may be exhausted. This is just a hypothesis. According to the Vision Council, lack of clarity about purpose and cost is preventing purchase. [Vision Council, September 12, 2025](https://thevisioncouncil.org/blog/latest-report-vision-council-shows-rising-awareness-smart-eyewear-recent-years)
 
-## 1. Complete the grocery trip
+Instacart reported approximately 600,000 monthly active shoppers in December 2025. This is not an estimate of how many people would purchase the glasses. However, their repeat selection of items and interactions with customers make them a good group to begin testing with. [Instacart, February 26, 2026](https://www.sec.gov/Archives/edgar/data/1579091/000157909126000018/cart-20251231.htm)
 
-Meta should propose an Instacart partnership covering item guidance, barcode confirmation, substitutions, and translated customer messages. Begin with two retailers providing reliable product locations; [Instacart's documentation (August 11, 2026)](https://docs.instacart.com/catalog/catalog_inventory_file/specifications/in-store-locations) supports aisle and shelf fields, but these are optional. Meta supplies the interface, Instacart connects order workflows, and retailers maintain location data. Partnership and technical access must be secured before rollout.
+## 1. App Integration
 
-Show one instruction at a time, confirm actions deliberately, and disable interactive overlays while driving. Keep participation voluntary and raw gaze data inaccessible to platforms. Against [Google's AI eyewear announcement (May 19, 2026)](https://blog.google/products-and-platforms/platforms/android/android-xr-io-2026/), differentiate through a complete, measurable job: fewer interruptions between finding an item and placing it in the cart.
+The phone will continue to handle accounts, connectivity and provide a backup interface while the glasses will show the next step of work to be completed. Partner apps could also show available paid tasks, like shopping for groceries, on the glasses, with workers choosing whether to accept.
 
-## 2. Make the interface comfortable enough to keep wearing
+Meta opened developer-preview access to display applications for both mobile and web applications in May 2026. This allows for controlled pilots rather than open access to third party worker accounts or uncontrolled distribution of the product. [Meta, May 14, 2026](https://developers.meta.com/blog/build-for-display-glasses/)
 
-Validate the workflow on available display hardware while developing transparent spatial AR. [Orion (September 25, 2024)](https://about.fb.com/news/2024/09/introducing-orion-our-first-true-augmented-reality-glasses/) establishes Meta's direction, not consumer readiness. Keep tracking local and move heavier computation to a phone or pocket module, following the distributed architecture described by [Qualcomm (November 16, 2022)](https://www.qualcomm.com/news/releases/2022/11/qualcomm-launches-snapdragon-ar2-designed-to-revolutionize-ar-gl). This reduces processing on the face but adds another device and connectivity dependence.
+Look for a pilot with Walmart Spark. Spark’s app already provides path information for shopping, location of items within aisles, images of items, confirmation of barcodes and substitution information. Under the proposed partnership, Meta would build the interface for the glasses while Walmart would allow integration into their platform and maintain information about the location of products. [Spark documentation, accessed September 12, 2026](https://sparkdriverapp-walmart.helpdocs.io/l/en/article/el2mg4pv0m-shopping-delivery-overview)
 
-Fund nanophotonic optics alongside conventional approaches. [Tian et al. (February 25, 2025)](https://doi.org/10.1038/s41377-025-01761-w) demonstrated couplers patterned from a 160-nanometer film on a 1-millimeter full-color waveguide. The nanoscale film controls light; it is neither a complete display nor commercially finished glasses. Advance designs only when brightness, readable text, manufacturing yield, heat, battery life, and cost improve together.
+## 2. Task Modes
 
-Let gaze point and deliberate input confirm. Offer an optional tactile ring for clicks and thumb scrolling alongside voice, physical controls, and wrist EMG, which has [peer-reviewed support (July 23, 2025)](https://www.nature.com/articles/s41586-025-09255-w). Test whether a ring helps while handling groceries before bundling it.
+In Shopping Mode, show one item, its size and its location. The camera will attempt to confirm the item using a barcode. If there is uncertainty, the item will be returned to manual verification. If an item is unavailable, show allowed substitutes and customer responses.
 
-## 3. Let shoppers experience the value before paying
+After checkout, Delivery Mode will replace the shopping list with walking directions and delivery information.
 
-Offer platform-funded loaners, prescription fitting, and clear returns through participating retailers. Preserve affordable audio glasses; price premium AR from verified willingness to pay and full unit costs. The [$799 launch price for Meta Ray-Ban Display with Neural Band (September 17, 2025)](https://about.fb.com/news/2025/09/meta-ray-ban-display-ai-glasses-emg-wristband/) illustrates the purchase hurdle; it is not a full-AR price forecast. Include basic controls without a subscription. Partner subsidies should reflect measured value from fewer errors or support requests. Model hardware, fitting, repairs, returns, and AI costs explicitly. Minutes saved count as financial value only when they generate verified additional earnings; otherwise, test what shoppers will pay to reclaim that time.
+With opt in, learn preferred display styles and familiar paths and allow workers to view or remove this information. AI can summarize the instructions and provide translations, but verified order information will be used for substitutions. Require confirmation before sending messages or changing orders. Capture images deliberately and do not include raw footage in platform performance tracking.
 
-## Invest through decision gates
+Begin with existing controls. Test an optional ring that allows for silent scrolling and clicking. Begin with glanceable interfaces rather than promises of world-anchored holograms. Expand to wider AR after proven improvements to tracking, battery life, heat and comfort.
 
-Year one: compensate volunteers in a crossover pilot comparing each shopper's phone and glasses shifts. Set proposed launch gates of at least 10% less in-store task time, no increase in errors or safety incidents, and a majority choosing glasses for at least three shifts weekly after eight weeks. These are targets to test, not forecasts. A small pilot without incidents does not establish safety; independent review remains essential.
+## 3. Trial and Pricing
 
-Years two–three: expand only after paid conversion supports positive margins including support and returns. If value disappears outside accurately mapped stores, improve coverage before scaling. Test mobile professionals as a secondary segment, retaining keyboards for sustained writing.
+Provide a proposed one month loan to workers through participating retailers with clear returns, basic work controls without a subscription and prescription fitting. Meta Ray-Ban Display launched from $799 including Neural Band. [Meta, September 17, 2025](https://about.fb.com/news/2025/09/meta-ray-ban-display-ai-glasses-emg-wristband/)
 
-Years four–five: expand navigation, personal assistance, and spatial workspaces when comfort, reliability, affordability, and privacy earn daily use. An assistant should learn only explicitly shared routines, with editable memory and confirmation before purchases or messages. Replacing the phone begins with giving people a reason to leave it in their pocket.
+Pricing should be based on willingness to pay and full costs. Only seek platform co-funding where fewer errors or support requests result in measurable value. Participation must remain voluntary. Share actual trial results through shopper communities and practical demonstrations rather than speculative earnings claims.
+
+## Five-Year Plan
+
+Year one: Interview nonbuyers and run compensated crossover trials comparing phone-only and glasses-assisted work in similar conditions. Proposed goals include at least 10% less time in store to complete tasks, no increase in errors and sustained voluntary use. These are goals for the trial and not established results. Small pilots cannot be used to establish safety.
+
+Years two-three: Require positive contribution after trial, acquisition, support and return costs. Track trial-to-purchase conversion and six month use before expanding. Secure commercial distribution and add platforms through separate agreements. Pause expansion where inaccurate store information erases the benefits.
+
+Years four-five: Expand to self-employed electricians who need hands-free access to job details, manuals and customer messages. Amazon’s development of delivery glasses demonstrates competitive interest rather than universal demand. Meta should differentiate by providing a worker owned device that supports multiple approved platforms. [Amazon, October 22, 2025](https://www.aboutamazon.com/news/transportation/smart-glasses-amazon-delivery-drivers)
+
+The long term opportunity is not just to replicate a phone but rather to make digital work fit the physical work.
