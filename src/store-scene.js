@@ -36,14 +36,14 @@ function routeAt(value, target = new THREE.Vector3()) {
 }
 
 /**
- * The page owns playback. Calling setProgress is the only way the worker advances.
+ * The page owns scroll progress. Calling setProgress is the only way the worker advances.
  * onReady fires after the first successful frame; onError receives an Error.
  */
 export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} } = {}) {
   let renderer, destroyed = false, failed = false, ready = false;
-  let raf = 0, visible = true, frameTime = 0, targetProgress = 0, progress = 0;
-  let mode = 'overview', arEnabled = true, motionEnabled = true, travelled = 0, stride = 0;
-  let motionUntil = performance.now() + 1600;
+  let raf = 0, visible = true, frameTime = 0, targetProgress = .18, progress = .18;
+  let mode = 'eyes', arEnabled = true, motionEnabled = true, stride = 0;
+  let gaitSpeed = 0, gaitPhase = 0, headingResidual = 0, needsRebase = true;
   const disposables = new Set();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const noop = () => {};
@@ -521,17 +521,35 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
     side:THREE.DoubleSide}),[0,0,-.005],[halfWidth*2,halfHeight*2,1],targetGroup,false);
   targetBacking.renderOrder=3;
   const itemSign=sign('Oat milk', '1 × 1 L · shelf 3', {width:1.08,height:.36,color:'#173e39',background:'#ecfff5'});
+  itemSign.material.transparent=true; itemSign.material.depthWrite=false;
   itemSign.position.set(0,1.15,0); targetGroup.add(itemSign);
-  const produceMarker=mesh(register(new THREE.RingGeometry(.65,.69,48)),targetMaterial,[-6.5,1.17,-6.13],null,augmented,false);
+  const produceMarkerMaterial=register(targetMaterial.clone()); produceMarkerMaterial.color.copy(mintColor);
+  const produceMarker=mesh(register(new THREE.RingGeometry(.65,.69,48)),produceMarkerMaterial,[-6.5,1.17,-6.13],null,augmented,false);
   produceMarker.rotation.x=-Math.PI/2;
   const produceLabel=sign('Fresh produce', '2 pears · picked', {width:1.2,height:.36,color:'#173e39',background:'#ecfff5'});
+  produceLabel.material.transparent=true; produceLabel.material.depthWrite=false;
   produceLabel.position.set(-6.5,1.75,-5.42); augmented.add(produceLabel);
 
-  const position=new THREE.Vector3(), nextPosition=new THREE.Vector3(), direction=new THREE.Vector3(0,0,-1);
-  const previousPosition=routeAt(0), cameraTarget=new THREE.Vector3(), desiredCamera=new THREE.Vector3();
+  const position=new THREE.Vector3(), nextPosition=new THREE.Vector3(), behindPosition=new THREE.Vector3();
+  const direction=new THREE.Vector3(0,0,-1), forward=new THREE.Vector3();
+  const cameraTarget=new THREE.Vector3(), desiredCamera=new THREE.Vector3();
   const desiredLook=new THREE.Vector3(), actualLook=new THREE.Vector3(0,.3,0);
   const milkTarget=new THREE.Vector3(3.77,1.37,-1.9), produceTarget=new THREE.Vector3(-6.5,1.0,-6.13);
-  const labelQuaternion=new THREE.Quaternion();
+  const labelQuaternion=new THREE.Quaternion(), desiredOrientation=new THREE.Quaternion();
+  const viewRotation=new THREE.Matrix4(), arrowColor=new THREE.Color();
+  // Arc distance gives wheels and reverse scrubbing the same physical route metric.
+  const distanceSamples=new Float32Array(769), samplePrevious=routeAt(0), sampleCurrent=new THREE.Vector3();
+  for(let i=1;i<distanceSamples.length;i++) {
+    routeAt(i/(distanceSamples.length-1),sampleCurrent);
+    distanceSamples[i]=distanceSamples[i-1]+sampleCurrent.distanceTo(samplePrevious);
+    samplePrevious.copy(sampleCurrent);
+  }
+  const distanceAt=value=>{
+    const index=THREE.MathUtils.clamp(value,0,1)*(distanceSamples.length-1);
+    const lower=Math.floor(index), upper=Math.min(lower+1,distanceSamples.length-1);
+    return THREE.MathUtils.lerp(distanceSamples[lower],distanceSamples[upper],index-lower);
+  };
+  let previousDistance=distanceAt(0);
   let yaw=Math.PI, cameraInitialized=false;
   const widthHeight={width:0,height:0};
   const host=canvas.parentElement || canvas;
@@ -544,30 +562,39 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
     if(width!==widthHeight.width || height!==widthHeight.height) {
       widthHeight.width=width; widthHeight.height=height;
       renderer.setSize(width,height,false); camera.aspect=width/height;
-      camera.updateProjectionMatrix(); motionUntil=performance.now()+500; requestFrame();
+      camera.updateProjectionMatrix(); requestFrame();
     }
   }
   function update(time,dt) {
-    const snap=reducedMotion.matches || !motionEnabled;
-    const ease=snap?1:1-Math.exp(-11*dt);
+    const snap=reducedMotion.matches || !motionEnabled || needsRebase;
+    // A short final smoothing pass absorbs scroll-event quantisation. The page
+    // may interpolate its own progress; this pass adds no spring overshoot.
+    const ease=snap?1:1-Math.exp(-16*dt);
     progress=THREE.MathUtils.lerp(progress,targetProgress,ease);
     if(Math.abs(progress-targetProgress)<.000015) progress=targetProgress;
     routeAt(progress,position);
-    const movement=position.distanceTo(previousPosition);
-    travelled+=movement;
-    const speed=dt>0?movement/dt:0;
-    stride=snap?0:THREE.MathUtils.lerp(stride,Math.min(1,speed/1.5),1-Math.exp(-12*dt));
-    previousPosition.copy(position);
-    routeAt(Math.min(1,progress+.012),nextPosition);
-    direction.copy(nextPosition).sub(position).setY(0);
-    if(direction.lengthSq()<.00001) direction.set(1,0,.2);
+    const distance=distanceAt(progress), signedSpeed=(distance-previousDistance)/dt;
+    previousDistance=distance;
+    // Replay the gait backwards when scrolling back; cap cadence during a fast
+    // scrub so small limbs never flicker through dozens of steps per second.
+    const desiredGaitSpeed=snap?0:THREE.MathUtils.clamp(signedSpeed,-2.15,2.15);
+    gaitSpeed=snap?0:THREE.MathUtils.lerp(gaitSpeed,desiredGaitSpeed,1-Math.exp(-10*dt));
+    gaitPhase=snap?distance*6.8:gaitPhase+gaitSpeed*6.8*dt;
+    stride=snap?0:THREE.MathUtils.lerp(stride,THREE.MathUtils.smoothstep(Math.abs(gaitSpeed),.025,1.3),1-Math.exp(-10*dt));
+    // A symmetric tangent remains defined at both ends and doesn't flip the
+    // camera when the reader changes scrolling direction.
+    routeAt(Math.min(1,progress+.006),nextPosition);
+    routeAt(Math.max(0,progress-.006),behindPosition);
+    direction.copy(nextPosition).sub(behindPosition).setY(0);
+    if(direction.lengthSq()<.00001) direction.set(Math.sin(yaw),0,Math.cos(yaw));
     direction.normalize();
     const desiredYaw=Math.atan2(direction.x,direction.z);
     const turn=Math.atan2(Math.sin(desiredYaw-yaw),Math.cos(desiredYaw-yaw));
-    yaw+=turn*(snap?1:1-Math.exp(-9*dt));
+    const yawStep=turn*(snap?1:1-Math.exp(-8*dt));
+    yaw+=yawStep; headingResidual=Math.abs(turn-yawStep);
     worker.position.copy(position); worker.rotation.y=yaw;
-    const phase=travelled*7.5;
-    person.position.y=Math.abs(Math.sin(phase))*.018*stride;
+    const phase=gaitPhase;
+    person.position.y=(1-Math.cos(phase*2))*.007*stride;
     torso.rotation.x=.035+Math.cos(phase*2)*.012*stride;
     torso.rotation.z=Math.sin(phase)*.018*stride;
     for(const {leg,lower,side} of legs) {
@@ -576,32 +603,43 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
       lower.rotation.x=-Math.max(0,-swing)*.51*stride;
     }
     for(const {arm,side} of arms) arm.rotation.x=Math.sin(phase+(side===1?Math.PI:0))*.085*stride;
-    cart.rotation.y=Math.sin(phase*.4)*.009*stride;
-    wheels.forEach(wheel=>{wheel.rotation.x=-travelled/.095;});
+    cart.rotation.y=snap?0:THREE.MathUtils.lerp(cart.rotation.y,THREE.MathUtils.clamp(-yawStep/dt*.024,-.07,.07),1-Math.exp(-8*dt));
+    wheels.forEach(wheel=>{wheel.rotation.x=-distance/.095;});
     workerShadow.scale.set(1.15,1.35,1);
     cartMilk.visible=progress>=.43; cartProduce.visible=progress>=.635;
 
     marker.position.set(position.x,.071,position.z);
     halo.position.set(position.x,.069,position.z);
-    const pulse=snap?1:1+Math.sin(time*.003)*.045;
+    // Guidance moves with the story rather than starting an idle animation.
+    const pulse=snap?1:1+Math.sin(progress*Math.PI*10)*.025;
     marker.scale.setScalar(pulse); halo.scale.setScalar(pulse);
     workerLocator.visible=mode==='overview'; workerLocator.position.copy(position);
     locatorSprite.scale.set(.64*pulse,.64*pulse,1);
-    targetGroup.visible=progress>=.29 && progress<.55;
+    const cueFade=(start,end)=>THREE.MathUtils.smoothstep(progress,start,start+.02)
+      *(1-THREE.MathUtils.smoothstep(progress,end-.02,end));
+    const itemFade=cueFade(.29,.55), produceFade=cueFade(.54,.70);
+    targetGroup.visible=itemFade>.001;
     targetGroup.position.set(3.48,1.49,-1.804); targetGroup.rotation.y=-Math.PI/2;
-    targetMaterial.color.copy(progress>.43?mintColor:orangeColor);
+    targetMaterial.color.copy(orangeColor).lerp(mintColor,THREE.MathUtils.smoothstep(progress,.425,.445));
     targetGlowMaterial.color.copy(targetMaterial.color);
-    produceMarker.visible=progress>=.54 && progress<=.70;
-    produceLabel.visible=produceMarker.visible;
+    targetMaterial.opacity=.88*itemFade; targetGlowMaterial.opacity=.12*itemFade;
+    targetBacking.material.opacity=.014*itemFade; itemSign.material.opacity=itemFade;
+    itemSign.visible=mode==='overview';
+    produceMarker.visible=produceFade>.001; produceMarkerMaterial.opacity=.88*produceFade;
+    produceLabel.visible=produceMarker.visible && mode==='overview';
+    produceLabel.material.opacity=produceFade;
     produceMarker.scale.setScalar(pulse);
     augmented.visible=arEnabled;
     for(let i=0;i<arrowProgress.length;i++) {
       const distance=arrowProgress[i]-progress;
-      const color=distance<-.025?dimColor:distance<.075?orangeColor:mintColor;
-      routeArrows.setColorAt(i,color);
+      const completed=1-THREE.MathUtils.smoothstep(distance,-.055,-.005);
+      const upcoming=THREE.MathUtils.smoothstep(distance,-.025,0)
+        *(1-THREE.MathUtils.smoothstep(distance,.035,.105));
+      arrowColor.copy(mintColor).lerp(dimColor,completed).lerp(orangeColor,upcoming);
+      routeArrows.setColorAt(i,arrowColor);
     }
     routeArrows.instanceColor.needsUpdate=true;
-    arrowMaterial.opacity=snap?.87:.77+Math.sin(time*.003)*.12;
+    arrowMaterial.opacity=.85;
 
     if(mode==='overview') {
       cameraTarget.set(position.x*.14,.22,position.z*.10-.3);
@@ -611,7 +649,7 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
       desiredLook.copy(cameraTarget);
       camera.fov=42;
     } else {
-      const forward=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
+      forward.set(Math.sin(yaw),0,Math.cos(yaw));
       desiredCamera.copy(position).addScaledVector(forward,.12);
       desiredCamera.y=1.67+(snap?0:Math.sin(phase*2)*.007*stride);
       desiredLook.copy(desiredCamera).addScaledVector(forward,4); desiredLook.y=1.40;
@@ -624,9 +662,19 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
       desiredLook.lerp(produceTarget,focusWindow(.575,.65)*.96);
       camera.fov=66;
     }
-    const cameraEase=snap || !cameraInitialized?1:1-Math.exp(-(mode==='eyes'?10:5)*dt);
-    camera.position.lerp(desiredCamera,cameraEase); actualLook.lerp(desiredLook,cameraEase);
-    camera.lookAt(actualLook); camera.updateProjectionMatrix(); cameraInitialized=true;
+    const cameraEase=snap || !cameraInitialized?1:1-Math.exp(-(mode==='eyes'?8:5)*dt);
+    if(mode==='eyes') {
+      // Position stays on the smoothed route. Smoothing position a second time
+      // could trail through the cart or shelves during a rapid scroll reversal.
+      camera.position.copy(desiredCamera); actualLook.copy(desiredLook);
+      viewRotation.lookAt(camera.position,desiredLook,camera.up);
+      desiredOrientation.setFromRotationMatrix(viewRotation);
+      camera.quaternion.slerp(desiredOrientation,cameraEase);
+    } else {
+      camera.position.lerp(desiredCamera,cameraEase); actualLook.lerp(desiredLook,cameraEase);
+      camera.lookAt(actualLook); desiredOrientation.copy(camera.quaternion);
+    }
+    camera.updateProjectionMatrix(); cameraInitialized=true; needsRebase=false;
     targetGroup.getWorldQuaternion(labelQuaternion);
     itemSign.quaternion.copy(labelQuaternion.invert().multiply(camera.quaternion));
     produceLabel.quaternion.copy(camera.quaternion);
@@ -642,18 +690,19 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
       update(time,dt); renderer.render(scene,camera);
       if(!ready) {ready=true;onReady();}
     } catch(error) {reportError(error);return;}
-    const moving=Math.abs(progress-targetProgress)>.000015 || stride>.001;
-    const cameraMoving=camera.position.distanceToSquared(desiredCamera)>.00001 || actualLook.distanceToSquared(desiredLook)>.00001;
-    if(moving || cameraMoving || (motionEnabled && !reducedMotion.matches && time<motionUntil)) requestFrame();
+    const moving=Math.abs(progress-targetProgress)>.000015 || stride>.001 || Math.abs(gaitSpeed)>.001 || headingResidual>.0005 || Math.abs(cart.rotation.y)>.0005;
+    const cameraMoving=camera.position.distanceToSquared(desiredCamera)>.00001 || actualLook.distanceToSquared(desiredLook)>.00001
+      || camera.quaternion.angleTo(desiredOrientation)>.0005;
+    if(moving || cameraMoving) requestFrame(); else frameTime=0;
   }
   function requestFrame() {
     if(!raf && !destroyed && !failed && visible && !document.hidden) raf=requestAnimationFrame(render);
   }
   function visibilityChanged() {
     frameTime=0;
-    if(document.hidden) {cancelAnimationFrame(raf);raf=0;} else requestFrame();
+    if(document.hidden) {needsRebase=true;cancelAnimationFrame(raf);raf=0;} else requestFrame();
   }
-  function motionChanged() { motionUntil=0; requestFrame(); }
+  function motionChanged() { requestFrame(); }
   function contextLost(event) {
     event.preventDefault();
     reportError(new Error('The interactive store lost its graphics context. Reload the page to restore the 3D view.'));
@@ -662,7 +711,7 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
   const intersectionObserver=new IntersectionObserver(entries=>{
     visible=entries[0]?.isIntersecting??true;
     frameTime=0;
-    if(visible) requestFrame(); else {cancelAnimationFrame(raf);raf=0;}
+    if(visible) requestFrame(); else {needsRebase=true;cancelAnimationFrame(raf);raf=0;}
   },{rootMargin:'120px'});
   intersectionObserver.observe(canvas);
   document.addEventListener('visibilitychange',visibilityChanged);
@@ -673,8 +722,9 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
   return {
     setProgress(value) {
       if(!Number.isFinite(value) || destroyed || failed) return;
-      targetProgress=THREE.MathUtils.clamp(value,0,1);
-      motionUntil=performance.now()+550;
+      const next=THREE.MathUtils.clamp(value,0,1);
+      if(Math.abs(next-targetProgress)<.0000001) return;
+      targetProgress=next;
       requestFrame();
     },
     setView(value) {
@@ -682,10 +732,10 @@ export function initStoreScene(canvas, { onReady = () => {}, onError = () => {} 
       if(mode===value) return;
       mode=value;
       // Enter eye level immediately so the camera never travels through shelving.
-      cameraInitialized=false; motionUntil=performance.now()+650; requestFrame();
+      cameraInitialized=false; requestFrame();
     },
-    setAR(value) {arEnabled=Boolean(value);motionUntil=performance.now()+350;requestFrame();},
-    setMotion(value) {motionEnabled=Boolean(value);motionUntil=motionEnabled?performance.now()+350:0;requestFrame();},
+    setAR(value) {arEnabled=Boolean(value);requestFrame();},
+    setMotion(value) {motionEnabled=Boolean(value);requestFrame();},
     destroy() {
       if(destroyed) return;
       destroyed=true; cancelAnimationFrame(raf); raf=0;

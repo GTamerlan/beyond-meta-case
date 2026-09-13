@@ -1,9 +1,10 @@
 import '@fontsource-variable/dm-sans';
 import '@fontsource-variable/manrope';
 import './work.css';
+import './work-landing.css';
 import { createIcons, ArrowUpRight, ArrowRight, ArrowDown, Play, Pause, RotateCcw, Glasses, MoveUpRight, Check, Plus, Minus, X, ScanLine, Navigation, ShoppingBag, Smartphone, CircleDot, ChevronRight, LockKeyhole, Volume2, Eye, Layers3, Wrench, CheckCheck, Copy, Download } from 'lucide';
 import { workSources, walkthroughSteps, navigationLayers } from './work-content.js';
-import { clamp, stageAt, nextProgress, newOrder, scanItem, requestReplacement, approveReplacement, confirmReplacement, orderCount } from './work-state.js';
+import { clamp, newOrder, scanItem, requestReplacement, approveReplacement, confirmReplacement, orderCount } from './work-state.js';
 import brief from './brief.md?raw';
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -19,21 +20,39 @@ document.querySelector('#app').innerHTML = `
 <div class="reading-progress" aria-hidden="true"></div>
 <header class="nav">
   <a class="brand" href="#top" aria-label="Beyond home">${logo}beyond<span>/ work</span></a>
-  <nav aria-label="Main navigation"><a href="#walkthrough">The experience</a><a href="#how">How it works</a><a href="#plan">The plan</a></nav>
+  <nav aria-label="Main navigation"><a href="#opportunity">The idea</a><a href="#walkthrough">See it work</a><a href="#plan">The plan</a></nav>
   <div class="nav-actions"><button id="motion-toggle" class="icon-button" aria-label="Pause decorative motion" aria-pressed="false">${icon('pause')}</button><button class="button small dark brief-open">Read the case ${icon('arrow-up-right')}</button></div>
 </header>
 <main id="top">
   <section class="hero wrap">
     <div class="hero-topline"><span><b class="live-dot"></b> AN INDEPENDENT STRATEGY FOR META</span><span>YUCG CASE STUDY · 2026—2031</span></div>
     <div class="hero-heading">
-      <h1>Good work.<br><span>Hands free.</span></h1>
-      <div class="hero-intro"><span class="mini-label">KEEP THE PHONE. FREE THE HANDS.</span><p>The next reason to buy smart glasses?<br>Making a real day’s work easier.</p><a class="text-link" href="#walkthrough">Step into the experience ${icon('arrow-down')}</a></div>
+      <h1>Your work. <span>In view.</span></h1>
+      <div class="hero-intro"><p>The next aisle. The right doorstep. The job notes. <br>See the next instruction without reaching for your phone.</p></div>
     </div>
+    <div class="hero-product" id="hero-product" data-holo="route">
+      <div class="hero-aurora" aria-hidden="true"></div>
+      <div class="hero-ground" aria-hidden="true"></div>
+      <canvas id="hero-canvas" role="img" aria-label="Original 3D concept of glossy black Wayfarer-style glasses, surrounded by illustrative work displays."></canvas>
+      <div class="hero-glasses-fallback" hidden aria-hidden="true"><span></span><span></span><i></i></div>
+      <svg class="holo-connections" viewBox="0 0 1200 540" preserveAspectRatio="none" aria-hidden="true"><path d="M345 355 Q210 300 265 220"/><path d="M760 348 Q1010 350 954 206"/><path d="M760 348 Q975 470 1035 370"/><circle cx="345" cy="355" r="3"/><circle cx="760" cy="348" r="3"/></svg>
+      <div class="holo-anchor holo-route"><article class="holo-card"><div class="holo-top"><span>${icon('navigation')} YOUR NEXT TURN</span><span class="holo-signal"><i></i><i></i><i></i></span></div><div class="holo-route-body"><svg viewBox="0 0 180 95" class="hero-route-map" fill="none" aria-hidden="true"><path class="map-road" d="M10 70H160M45 8V87M105 8V87M160 8V87M10 23H170"/><path class="hero-route-line" d="M45 81V35Q45 23 60 23H133"/><circle cx="45" cy="78" r="6"/><path class="route-tip" d="m126 16 8 7-8 7"/></svg><div><strong>Aisle 03</strong><p>Oat milk. On your right.</p></div></div><div class="holo-foot"><span class="holo-status-dot"></span> Just the direction you need.</div></article></div>
+      <div class="holo-anchor holo-match"><article class="holo-card"><div class="holo-top"><span>${icon('scan-line')} THE RIGHT ITEM</span><span>01 / 02</span></div><div class="holo-item-body"><div class="hero-oat" aria-hidden="true"><span>OAT<br><b>MILK</b></span></div><div><strong>That’s the one.</strong><p>Oat milk · original</p><span class="holo-confirm">${icon('check')} Match found</span></div></div><div class="holo-foot">Check the item. Confirm it yourself.</div></article></div>
+      <div class="holo-anchor holo-message"><article class="holo-card"><div class="holo-avatar">J</div><div><span class="mini-label">CUSTOMER MESSAGE</span><strong>“By the front door is perfect.”</strong><p>A glance. And you’re on your way.</p></div><span class="message-orbit" aria-hidden="true"></span></article></div>
+      <div class="hero-product-caption"><span>FAMILIAR FRAMES. A NEW WAY TO WORK.</span><span>BLACK WAYFARER-STYLE / ORIGINAL 3D CONCEPT</span></div>
+    </div>
+    <div class="hero-under"><div class="holo-modes" role="group" aria-label="Choose a proposed work display"><button data-holo-mode="route" aria-pressed="true">${icon('navigation')} Navigate</button><button data-holo-mode="match" aria-pressed="false">${icon('scan-line')} Check an item</button><button data-holo-mode="message" aria-pressed="false">${icon('check-check')} See a message</button></div><a class="hero-scroll" href="#walkthrough">See it at work <span>${icon('arrow-down')}</span></a></div>
+    <p class="hero-concept-note">An imagined spatial display experience, not a feature of ordinary Ray-Ban Meta glasses.</p>
+  </section>
 
-    <div class="store-shell" id="walkthrough">
-      <div class="scene-toolbar"><span class="scene-name"><span class="tiny-dot"></span> THE NEIGHBORHOOD MARKET <em>Interactive concept</em></span><div class="view-toggle" role="group" aria-label="Store camera"><button data-view="overview" aria-pressed="true">${icon('layers3')} Store view</button><button data-view="eyes" aria-pressed="false">${icon('glasses')} Through the glasses</button></div></div>
-      <div class="store-stage" id="store-stage" data-view="overview">
-        <canvas id="store-canvas" role="img" aria-label="Interactive 3D concept: a worker walks a grocery-store route with AR guidance. Use the view buttons and timeline to explore."></canvas>
+  <section class="walk-section wrap" aria-labelledby="walk-section-heading"><div class="walk-section-heading"><div><span class="eyebrow">FROM A GOOD IDEA TO A REAL DAY.</span><h2 id="walk-section-heading">Less looking down.<br><span>More getting it done.</span></h2></div><p>One worker. One grocery order.<br>Scroll to move through the shift.</p></div>
+  <div class="walk-track" id="walkthrough"><div class="walk-sticky">
+    <div class="store-shell">
+      <div class="scene-toolbar"><div class="environment-tabs" role="group" aria-label="Choose a work environment"><button data-environment="grocery" aria-pressed="true">${icon('shopping-bag')} Grocery</button><button data-environment="delivery" aria-pressed="false">${icon('navigation')} Delivery</button><button data-environment="electrician" aria-pressed="false">${icon('wrench')} Electrician</button></div><span class="scene-name">${icon('glasses')} THROUGH THE GLASSES <em>Concept demo</em></span></div>
+      <div class="store-stage" id="store-stage" data-view="eyes" data-environment="grocery">
+        <canvas id="store-canvas" role="img" aria-label="First-person grocery shopping concept with AR guidance. Choose a step below to move through the aisle."></canvas>
+        <canvas id="environment-canvas" role="img" aria-label="First-person concept of a delivery doorstep or an electrician’s site visit." hidden></canvas>
+        <div class="environment-loading" hidden>Preparing this view…</div>
         <div class="scene-loading"><span class="loading-orbit"></span><span>Setting up your shift</span></div>
         <div class="scene-fallback" hidden><span>${icon('shopping-bag')}</span><h3>Your next step. In view.</h3><p>The interactive 3D view is unavailable on this device. Use the six steps below to explore the same workflow.</p></div>
         <div class="store-caption"><span class="mini-label">ONE WORKER. ONE ORDER.</span><p>Follow the route.<br>See the difference.</p></div>
@@ -43,10 +62,11 @@ document.querySelector('#app').innerHTML = `
         <button id="ar-toggle" class="ar-toggle" aria-pressed="true">${icon('eye')} AR guidance <span>On</span></button>
         <span class="scene-label">SPATIAL AR VISUALIZATION · PROPOSED FUTURE EXPERIENCE</span>
       </div>
-      <div class="playback-bar"><button id="walk-play" class="play-button" aria-label="Play store walkthrough">${icon('play')}</button><div class="progress-wrap"><label for="walk-progress">Explore the shift <span id="walk-percent">0%</span></label><input id="walk-progress" type="range" min="0" max="1000" value="0" aria-label="Progress through the store walkthrough"/></div><button id="walk-reset" class="icon-button" aria-label="Restart walkthrough">${icon('rotate-ccw')}</button><span class="playback-note">DRAG TO EXPLORE</span></div>
+      <div class="shift-scroll-progress" aria-hidden="true"><span></span></div>
     </div>
     <div class="walk-steps" role="group" aria-label="Jump to a step in the shopping experience">${walkthroughSteps.map((s, n) => `<button data-step="${n}" aria-pressed="${n === 0}"><span class="step-number">${String(n + 1).padStart(2, '0')}</span><span>${s.title}</span><b></b></button>`).join('')}</div>
-    <div class="walk-explainer"><div><span id="walk-kicker" class="mini-label">${walkthroughSteps[0].kicker}</span><h3 id="walk-title">${walkthroughSteps[0].title}</h3></div><p id="walk-detail">${walkthroughSteps[0].detail}</p><span class="concept-note">A simulated order in a fictional store. No live tracking, worker accounts or camera access.</span></div>
+    <div class="walk-explainer"><div><span id="walk-kicker" class="mini-label">${walkthroughSteps[0].kicker}</span><h3 id="walk-title">${walkthroughSteps[0].title}</h3></div><p id="walk-detail">${walkthroughSteps[0].detail}</p><span class="concept-note"><span class="scroll-motif">${icon('arrow-down')}</span> YOUR SCROLL MOVES THE SHIFT</span></div>
+    </div></div><p class="walk-disclosure">A simulated order in a fictional store. No live tracking, worker accounts or camera access.</p>
   </section>
 
   <section class="thesis wrap section" id="opportunity">
@@ -56,6 +76,7 @@ document.querySelector('#app').innerHTML = `
     <div class="evidence-row"><article><div class="data-number">600<span>k</span></div><h3>Monthly active shoppers.</h3><p>Instacart · December 2025. A reachable worker community, not a forecast of glasses sales.</p>${source('shopper-scale', 'Instacart · Feb 26, 2026')}</article><article class="purpose-stat"><span class="visual-asterisk" aria-hidden="true">✳</span><h3>Give curiosity<br>a daily purpose.</h3><p>Unclear need and cost are reported barriers. A useful shift is a stronger test than another product demo.</p>${source('visioncouncil', 'The Vision Council · Sep 12, 2025')}</article><article><div class="data-number orange">10<span>%</span></div><h3>A target. Not a claim.</h3><p>Proposed pilot goal: less in-store task time, with no increase in errors and sustained voluntary use.</p><span class="fact-label">PROPOSED TEST THRESHOLD · NOT MEASURED</span></article></div>
   </section>
 
+  <details class="deep-dive wrap" id="details"><summary><span><span class="mini-label">WANT TO GO A LITTLE DEEPER?</span><strong>Explore the details.</strong><span>Navigation, product checks, and the connected devices.</span></span>${icon('plus')}</summary><div class="deep-dive-content">
   <section class="navigation-section" id="how"><div class="wrap section">
     <div class="section-top"><span class="eyebrow">02 / THE NAVIGATION LAYER</span><span class="side-note">WHAT HAS TO HAPPEN BEHIND THE ARROW.</span></div>
     <div class="section-heading"><h2>Directions that<br><em>belong in the world.</em></h2><p>A floating arrow is the easy part.<br>Knowing where it belongs is the real work.</p></div>
@@ -78,7 +99,8 @@ document.querySelector('#app').innerHTML = `
     <div class="workflow-cards"><article><span class="workflow-icon">${icon('shopping-bag')}</span><span class="mini-label">FIND WORK</span><h3>The next paid task.</h3><p>Approved partner apps could surface grocery or food-delivery jobs. The worker chooses whether to accept.</p><span class="small-print">Existing opportunities, not a promise of new jobs.</span></article><article><span class="workflow-icon">${icon('volume2')}</span><span class="mini-label">MAKE IT YOURS</span><h3>Help that adapts.</h3><p>Opt into preferred display styles and familiar routes. Review or clear that memory. Confirm messages before sending.</p><button id="assistant-open" class="text-link">Try your preferences ${icon('arrow-right')}</button></article><article><span class="workflow-icon">${icon('wrench')}</span><span class="mini-label">EXPAND CAREFULLY</span><h3>Then, the next trade.</h3><p>Self-employed electricians could access job details, reference manuals and customer messages with their hands occupied.</p><span class="small-print">Later-stage hypothesis. Not a substitute for training.</span></article></div>
   </section>
 
-  <section class="plan-section" id="plan"><div class="wrap section"><div class="section-top"><span class="eyebrow">05 / THE FIVE-YEAR PLAN</span><span class="side-note">VALUE FIRST. SCALE SECOND.</span></div><div class="section-heading"><h2>Make the first shift<br><em>worth a second.</em></h2><p>A worker buys a tool, not a promise.<br>Let the trial make the case.</p></div><div class="plan-tabs" role="tablist" aria-label="Implementation phases"><button role="tab" id="plan-tab-0" aria-selected="true" aria-controls="plan-panel" data-phase="0"><span>YEAR 1</span><strong>Prove the work.</strong>${icon('arrow-up-right')}</button><button role="tab" id="plan-tab-1" aria-selected="false" aria-controls="plan-panel" tabindex="-1" data-phase="1"><span>YEARS 2—3</span><strong>Earn the purchase.</strong>${icon('arrow-up-right')}</button><button role="tab" id="plan-tab-2" aria-selected="false" aria-controls="plan-panel" tabindex="-1" data-phase="2"><span>YEARS 4—5</span><strong>Expand the use.</strong>${icon('arrow-up-right')}</button></div><div class="plan-panel" id="plan-panel" role="tabpanel" aria-labelledby="plan-tab-0"><div class="plan-number" aria-hidden="true">01</div><div><span class="mini-label" id="plan-kicker">CONTROLLED GROCERY PILOT</span><h3 id="plan-title">Let a real shift answer.</h3><p id="plan-copy">Interview nonbuyers. Compare paid, comparable phone-only and glasses-assisted shifts. Test comfort, mistakes, task time and voluntary use.</p></div><div class="plan-gate"><span class="mini-label">THE DECISION GATE</span><p id="plan-gate">Proposed target: at least 10% less in-store task time, no increase in errors, and sustained voluntary use. A small trial does not establish safety.</p></div></div>
+  </div></details>
+  <section class="plan-section" id="plan"><div class="wrap section"><div class="section-top"><span class="eyebrow">THE FIVE-YEAR PLAN</span><span class="side-note">VALUE FIRST. SCALE SECOND.</span></div><div class="section-heading"><h2>Make the first shift<br><em>worth a second.</em></h2><p>A worker buys a tool, not a promise.<br>Let the trial make the case.</p></div><div class="plan-tabs" role="tablist" aria-label="Implementation phases"><button role="tab" id="plan-tab-0" aria-selected="true" aria-controls="plan-panel" data-phase="0"><span>YEAR 1</span><strong>Prove the work.</strong>${icon('arrow-up-right')}</button><button role="tab" id="plan-tab-1" aria-selected="false" aria-controls="plan-panel" tabindex="-1" data-phase="1"><span>YEARS 2—3</span><strong>Earn the purchase.</strong>${icon('arrow-up-right')}</button><button role="tab" id="plan-tab-2" aria-selected="false" aria-controls="plan-panel" tabindex="-1" data-phase="2"><span>YEARS 4—5</span><strong>Expand the use.</strong>${icon('arrow-up-right')}</button></div><div class="plan-panel" id="plan-panel" role="tabpanel" aria-labelledby="plan-tab-0"><div class="plan-number" aria-hidden="true">01</div><div><span class="mini-label" id="plan-kicker">CONTROLLED GROCERY PILOT</span><h3 id="plan-title">Let a real shift answer.</h3><p id="plan-copy">Interview nonbuyers. Compare paid, comparable phone-only and glasses-assisted shifts. Test comfort, mistakes, task time and voluntary use.</p></div><div class="plan-gate"><span class="mini-label">THE DECISION GATE</span><p id="plan-gate">Proposed target: at least 10% less in-store task time, no increase in errors, and sustained voluntary use. A small trial does not establish safety.</p></div></div>
     <div class="access-row"><div><span class="access-number">01</span><h3>Borrow before buying.</h3><p>Proposed month-long loans through retailers, with prescription fitting and clear returns.</p></div><div><span class="access-number">02</span><h3>Price the real costs.</h3><p>Hardware, support, returns and AI services. No invented margins or guaranteed income.</p></div><div><span class="access-number">03</span><h3>Share the evidence.</h3><p>Show actual trial results in worker communities. Seek partner co-funding only for measured value.</p></div></div><div class="price-note"><strong>$799</strong><p>Meta Ray-Ban Display launch price, including Neural Band.<br><span>September 17, 2025 · a purchase hurdle, not our proposed price.</span></p>${source('display', 'The launch announcement')}</div></div></section>
 
   <footer class="footer wrap"><span class="eyebrow">THE AMBITION IS SIMPLE.</span><h2>Make digital work<br><span>fit the physical world.</span></h2><div class="footer-actions"><button class="button dark brief-open">Read Tamerlan’s proposal ${icon('arrow-up-right')}</button><button class="text-link sources-open">The research behind it ${icon('arrow-right')}</button></div><div class="footer-bottom"><a class="brand" href="#top">${logo}beyond<span>/ work</span></a><p>Tamerlan Goglichidze · YUCG application case</p><a class="text-link" href="#top">Back to top ${icon('arrow-up-right')}</a></div><p class="disclaimer">An independent proposal, not affiliated with Meta, Walmart, Instacart, Amazon or YUCG. All 3D scenes, routes and interfaces are illustrative concepts. No partnerships, product capabilities or productivity gains are implied by the simulations. Secondary research only; no original customer interviews. No camera, microphone, account connection or analytics. Research reviewed September 12, 2026.</p></footer>
@@ -89,76 +111,129 @@ document.querySelector('#app').innerHTML = `
 <dialog id="assistant-dialog" aria-labelledby="assistant-heading"><div class="dialog-header"><div><span class="mini-label">LOCAL INTERFACE SIMULATION</span><h2 id="assistant-heading">Your work. Your settings.</h2></div><button class="close-dialog icon-button" aria-label="Close preferences">${icon('x')}</button></div><div class="dialog-body"><p>Try a quieter, larger or more familiar display. These preferences stay only in this page session. This is not a live AI assistant.</p><div class="preference-controls"><label><input type="checkbox" id="pref-optin"/> Opt into preferences for this demo</label><label>Display size<select id="pref-size" disabled><option value="standard">Standard</option><option value="large">Larger text</option></select></label><label>Interruptions<select id="pref-noise" disabled><option value="normal">Show task updates</option><option value="quiet">Only actions that need me</option></select></label></div><div class="preference-preview"><span class="mini-label">YOUR NEXT STEP</span><h3>Oat milk · aisle 03</h3><p id="pref-notification">Task update: continue to the next item.</p></div><button id="clear-preferences" class="text-link">Clear this session’s preferences ${icon('rotate-ccw')}</button><p class="small-print" id="pref-status" aria-live="polite">Personalization is off. No preferences have been stored.</p></div></dialog>
 `;
 
+// Keep the first screen focused: one environment, one instruction.
+const secondaryProduct = document.createElement('section');
+secondaryProduct.className = 'secondary-product';
+secondaryProduct.innerHTML = '<span class="eyebrow">THE DEVICE BEHIND THE VIEW</span><h2>Familiar frames.<br><span>A different way to work.</span></h2>';
+secondaryProduct.append($('#hero-product'), $('.hero-under'), $('.hero-concept-note'));
+$('.deep-dive-content').prepend(secondaryProduct);
+$('.hero').append($('#walkthrough'));
+$('.walk-section').remove();
+$('.hero').insertAdjacentHTML('beforeend', '<p class="experience-disclaimer" id="experience-disclaimer">Concept demos. Task cards are proposed partner integrations; world-anchored AR needs supported tracking hardware. Grocery & delivery first. Electricians are a later-stage proposal.</p>');
+$('.walk-steps').innerHTML = ['Find the aisle', 'Check the item', 'Next on the list'].map((label, n) => `<button data-work-step="${n}" aria-pressed="${n === 0}"><span class="step-number">0${n + 1}</span><span>${label}</span><b></b></button>`).join('');
+$('.walk-explainer .concept-note').remove();
+$('.footer-bottom').append($('#motion-toggle'));
 refreshIcons();
 const reducedQuery = matchMedia('(prefers-reduced-motion: reduce)');
 let motion = !reducedQuery.matches;
-let scene, productScene, progress = 0, playing = false, storeVisible = false, lastTick = 0, frame = 0, activeStage = -1;
-let chosenView = 'overview', arEnabled = true;
+let scene, productScene, heroScene, environmentScene, environmentPromise, progress = .18, targetProgress = .18, storeVisible = false, lastTick = 0, frame = 0;
+let chosenView = 'eyes', arEnabled = true, activeEnvironment = 'grocery', workStep = 0, groceryUnavailable = false;
 function setMotion(enabled) {
   motion = enabled;
   document.documentElement.dataset.motion = enabled ? 'on' : 'off';
   $('#motion-toggle').setAttribute('aria-pressed', String(!enabled));
   $('#motion-toggle').setAttribute('aria-label', enabled ? 'Pause decorative motion' : 'Enable decorative motion');
-  $('#motion-toggle').innerHTML = icon(enabled ? 'pause' : 'play');
-  scene?.setMotion?.(enabled); productScene?.setMotion?.(enabled);
-  if (!enabled) setPlaying(false);
+  $('#motion-toggle').textContent = enabled ? 'Motion on' : 'Motion off';
+  scene?.setMotion?.(enabled); productScene?.setMotion?.(enabled); heroScene?.setMotion?.(enabled); environmentScene?.setMotion?.(enabled);
   refreshIcons();
 }
 setMotion(motion);
 $('#motion-toggle').addEventListener('click', () => setMotion(!motion));
 reducedQuery.addEventListener('change', e => setMotion(!e.matches));
 
-const hudTasks = ['Choose your next job.', 'Head to the dairy aisle.', 'Check the exact product.', 'Pick the next item.', 'Review, then check out.', 'Next stop: the doorstep.'];
-const hudLocations = ['AVAILABLE WORK / DEMO', 'STORE ROUTE / AISLE 03', 'PRODUCT CHECK / OAT MILK', 'PRODUCE / APPLES', 'CHECKOUT / ORDER REVIEW', 'WALKING DIRECTIONS / DELIVERY'];
-function updateWalk(value, manual = false) {
+const workExperiences = {
+  grocery: [
+    { label: 'Find the aisle', title: 'The next item. Right ahead.', detail: 'An approved store map could guide a shopper to the right aisle, while the phone stays in their pocket.', hud: 'Oat milk → aisle 03', location: 'GROCERY / YOUR NEXT ITEM', icon: 'navigation', progress: .18 },
+    { label: 'Check the item', title: 'Look. Check. Confirm.', detail: 'Show the requested product, help verify the match, then let the worker confirm. A replacement still needs approval.', hud: 'Oat milk · original · check the match', location: 'GROCERY / PRODUCT CHECK', icon: 'scan-line', progress: .42 },
+    { label: 'Next on the list', title: 'One thing at a time.', detail: 'Once an item is confirmed, bring up the next useful instruction—not the entire app.', hud: 'Next: apples → produce', location: 'GROCERY / NEXT STOP', icon: 'navigation', progress: .62 },
+  ],
+  delivery: [
+    { label: 'Find the door', title: 'The last few steps, made clearer.', detail: 'After parking, bring the walking route and the delivery entrance into view. Keep visual interactions off while driving.', hud: 'Delivery entrance → front door', location: 'DELIVERY / WALKING ONLY', icon: 'navigation' },
+    { label: 'Read the note', title: 'Read the customer’s note.', detail: 'A brief customer note could appear at the destination. No app switching while carrying the bags.', hud: '“Please leave it by the front door.”', location: 'DELIVERY / CUSTOMER NOTE', icon: 'shopping-bag' },
+    { label: 'Confirm drop-off', title: 'The worker has the final say.', detail: 'Review the drop-off before confirming in a supported partner app. This demo does not submit a delivery or take a photo.', hud: 'At the right door? Review and confirm.', location: 'DELIVERY / REVIEW', icon: 'check' },
+  ],
+  electrician: [
+    { label: 'Review the job', title: 'The brief, without the phone.', detail: 'For a later-stage pilot, a qualified electrician could glance at approved job notes during a site visit.', hud: 'Site visit · review the customer’s notes', location: 'ELECTRICIAN / JOB DETAILS', icon: 'wrench' },
+    { label: 'Open the reference', title: 'The right reference, close by.', detail: 'Access a verified manufacturer manual by equipment model. Not AI-generated repair directions or a substitute for training.', hud: 'Equipment reference · verify the model', location: 'ELECTRICIAN / REFERENCE ONLY', icon: 'layers3' },
+    { label: 'Read the message', title: 'Keep the customer in the loop.', detail: 'Review a customer message during the site visit. Any reply requires the worker’s confirmation before sending.', hud: '“Please call when the site visit is complete.”', location: 'ELECTRICIAN / CUSTOMER MESSAGE', icon: 'check-check' },
+  ],
+};
+function updateWalk(value) {
   progress = clamp(value);
-  if (manual) setPlaying(false);
   scene?.setProgress(progress);
-  $('#walk-progress').value = Math.round(progress * 1000);
-  $('#walk-percent').textContent = `${Math.round(progress * 100)}%`;
-  $('#walk-progress').style.setProperty('--progress', `${progress * 100}%`);
-  const index = stageAt(progress, walkthroughSteps);
-  if (index === activeStage) return;
-  activeStage = index;
-  const step = walkthroughSteps[index];
-  $('#walk-kicker').textContent = step.kicker;
-  $('#walk-title').textContent = step.title;
-  $('#walk-detail').textContent = step.detail;
-  $('#hud-task').textContent = hudTasks[index] || step.task;
-  $('.direction-symbol').innerHTML = icon(index === 0 ? 'shopping-bag' : index === 2 || index === 3 ? 'scan-line' : index === 4 ? 'check' : 'navigation');
-  $('#hud-location').textContent = hudLocations[index] || step.location;
-  $('#hud-item-name').textContent = index >= 3 ? index >= 4 ? 'Ready for the next step' : 'Apples' : 'Oat milk';
-  $('.hud-item > div:first-child').className = index === 3 ? 'mini-apple' : 'mini-carton';
-  $('.hud-item > div:first-child').hidden = index >= 4;
-  $('#hud-item-detail').textContent = index >= 4 ? 'Confirm before moving on.' : 'Verify the item. Keep the choice yours.';
-  $$('.walk-steps button').forEach((b, n) => { b.setAttribute('aria-pressed', String(index === n)); b.classList.toggle('is-complete', n < index); });
-  $('#store-stage').dataset.step = String(index);
-  refreshIcons();
+  $('#walkthrough').dataset.progress = String(Math.round(progress * 1000));
+  $('.shift-scroll-progress span').style.transform = `scaleX(${progress})`;
 }
 function tick(time) {
   frame = 0;
-  if (!playing || !storeVisible || document.hidden) { lastTick = 0; return; }
-  if (!lastTick) lastTick = time;
-  updateWalk(nextProgress(progress, Math.min((time - lastTick) / 1000, .08)));
+  if (!storeVisible || document.hidden) { lastTick = 0; return; }
+  const dt = lastTick ? Math.min((time - lastTick) / 1000, .05) : 1 / 60;
   lastTick = time;
-  if (progress >= 1) { setPlaying(false); return; }
-  frame = requestAnimationFrame(tick);
+  const amount = motion ? 1 - Math.exp(-7 * dt) : 1;
+  const next = progress + (targetProgress - progress) * amount;
+  updateWalk(Math.abs(targetProgress - next) < .00015 ? targetProgress : next);
+  if (progress !== targetProgress) frame = requestAnimationFrame(tick);
 }
-function kick() { if (playing && storeVisible && !document.hidden && !frame) { lastTick = 0; frame = requestAnimationFrame(tick); } }
-function setPlaying(next) {
-  playing = next;
-  const button = $('#walk-play');
-  button.innerHTML = icon(next ? 'pause' : 'play');
-  button.setAttribute('aria-label', next ? 'Pause store walkthrough' : 'Play store walkthrough');
-  button.setAttribute('aria-pressed', String(next));
+function kick() { if (storeVisible && !document.hidden && !frame) { lastTick = 0; frame = requestAnimationFrame(tick); } }
+function setWorkStep(index) {
+  workStep = index;
+  const steps = workExperiences[activeEnvironment], step = steps[index];
+  $('#walk-kicker').textContent = activeEnvironment === 'electrician' ? 'LATER-STAGE PROPOSAL' : 'THE PROPOSED EXPERIENCE';
+  $('#walk-title').textContent = step.title;
+  $('#walk-detail').textContent = step.detail;
+  $('#hud-task').textContent = step.hud;
+  $('#hud-location').textContent = step.location;
+  $('.direction-symbol').innerHTML = icon(step.icon);
+  if (motion) $('.hud-direction').animate([{ opacity: .3, translate: '0 5px' }, { opacity: 1, translate: '0 0' }], { duration: 300, easing: 'ease-out' });
+  $$('[data-work-step]').forEach((button, n) => {
+    button.setAttribute('aria-pressed', String(n === index));
+    button.querySelector('span:nth-child(2)').textContent = steps[n].label;
+  });
+  if (activeEnvironment === 'grocery') {
+    targetProgress = step.progress;
+    if (!motion || !storeVisible) updateWalk(targetProgress); else kick();
+  }
   refreshIcons();
-  if (!next && frame) { cancelAnimationFrame(frame); frame = 0; lastTick = 0; }
-  kick();
 }
-$('#walk-play').addEventListener('click', () => { if (progress >= 1) updateWalk(0); setPlaying(!playing); });
-$('#walk-reset').addEventListener('click', () => updateWalk(0, true));
-$('#walk-progress').addEventListener('input', e => updateWalk(Number(e.target.value) / 1000, true));
-$$('[data-step]').forEach(b => b.addEventListener('click', () => updateWalk(walkthroughSteps[Number(b.dataset.step)].progress, true)));
+function showEnvironmentFailure() {
+  $('.scene-fallback').hidden = false;
+  $('.scene-fallback h3').textContent = 'Your next step. In view.';
+  $('.scene-fallback p').textContent = 'The 3D view is unavailable on this device. Choose a work environment and a step below to explore the proposal.';
+}
+async function setEnvironment(kind) {
+  activeEnvironment = kind;
+  const isGrocery = kind === 'grocery';
+  $('#store-stage').dataset.environment = kind;
+  $('#store-canvas').hidden = !isGrocery;
+  $('#environment-canvas').hidden = isGrocery;
+  $('.scene-loading').hidden = !isGrocery || groceryUnavailable || $('#store-stage').classList.contains('is-ready');
+  $('.scene-fallback').hidden = true;
+  $('#store-stage').classList.remove('no-webgl');
+  $$('.environment-tabs button').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.environment === kind)));
+  setWorkStep(0);
+  if (isGrocery) {
+    $('.environment-loading').hidden = true;
+    if (groceryUnavailable) showEnvironmentFailure();
+    return;
+  }
+  $('.environment-loading').hidden = false;
+  environmentPromise ||= import('./work-environments.js').then(({ initWorkEnvironments }) => {
+    environmentScene = initWorkEnvironments($('#environment-canvas'));
+    environmentScene.setMotion(motion);
+    return environmentScene;
+  });
+  try {
+    await environmentPromise;
+    if (activeEnvironment === 'grocery') return;
+    environmentScene.setEnvironment(activeEnvironment);
+    if ($('#environment-canvas').dataset.environmentState === 'unavailable') showEnvironmentFailure();
+    else if (motion) $('#environment-canvas').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, easing: 'ease-out' });
+  } catch { if (activeEnvironment !== 'grocery') showEnvironmentFailure(); }
+  finally { $('.environment-loading').hidden = true; }
+}
+$$('[data-work-step]').forEach(button => button.addEventListener('click', () => setWorkStep(Number(button.dataset.workStep))));
+$$('[data-environment]').filter(el => el.tagName === 'BUTTON').forEach(button => button.addEventListener('click', () => setEnvironment(button.dataset.environment)));
+setWorkStep(0);
 $$('[data-view]').forEach(b => b.addEventListener('click', () => {
   chosenView = b.dataset.view; scene?.setView(chosenView);
   $('#store-stage').dataset.view = chosenView;
@@ -170,15 +245,37 @@ $('#ar-toggle').addEventListener('click', () => {
   $('#ar-toggle span').textContent = arEnabled ? 'On' : 'Off';
   $('#store-stage').classList.toggle('ar-off', !arEnabled);
 });
-new IntersectionObserver(entries => { storeVisible = entries[0].isIntersecting; if (storeVisible) kick(); }, { threshold: .08 }).observe($('#store-stage'));
+new IntersectionObserver(entries => { storeVisible = entries[0].isIntersecting; if (storeVisible) kick(); }, { threshold: .01 }).observe($('#store-stage'));
 document.addEventListener('visibilitychange', kick);
-updateWalk(0);
-function sceneFailure() { $('.scene-loading').hidden = true; $('.scene-fallback').hidden = false; $('#store-stage').classList.add('no-webgl'); }
+updateWalk(.18);
+function sceneFailure() { groceryUnavailable = true; $('.scene-loading').hidden = true; if (activeEnvironment === 'grocery') showEnvironmentFailure(); }
 import('./store-scene.js').then(({ initStoreScene }) => {
   scene = initStoreScene($('#store-canvas'), { onReady() { $('.scene-loading').hidden = true; $('#store-stage').classList.add('is-ready'); }, onError: sceneFailure });
   scene?.setMotion?.(motion); scene?.setView(chosenView); scene?.setAR(arEnabled); scene?.setProgress(progress);
-  if (motion) setTimeout(() => { if (progress === 0 && motion && scene) setPlaying(true); }, 900);
 }).catch(sceneFailure);
+$('#environment-canvas').addEventListener('webglcontextlost', () => { if (activeEnvironment !== 'grocery') showEnvironmentFailure(); });
+$('#environment-canvas').addEventListener('webglcontextrestored', () => { if (activeEnvironment !== 'grocery') $('.scene-fallback').hidden = true; });
+
+function heroReady() { $('#hero-product').classList.add('hero-ready'); }
+function heroFailure() { $('.hero-glasses-fallback').hidden = false; heroReady(); }
+const heroObserver = new IntersectionObserver(entries => {
+  if (!entries[0].isIntersecting) return;
+  heroObserver.disconnect();
+  import('./work-hero.js').then(({ initWorkHero }) => {
+  heroScene = initWorkHero($('#hero-canvas'));
+  heroScene?.setMotion(motion);
+  if ($('#hero-canvas').dataset.heroState === 'unavailable') heroFailure();
+  else requestAnimationFrame(heroReady);
+  }).catch(heroFailure);
+}, { rootMargin: '250px' });
+heroObserver.observe($('#hero-canvas'));
+$$('[data-holo-mode]').forEach(b => b.addEventListener('click', () => {
+  $('#hero-product').dataset.holo = b.dataset.holoMode;
+  $$('[data-holo-mode]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+}));
+new IntersectionObserver(entries => {
+  $('#hero-product').classList.toggle('hero-offscreen', !entries[0].isIntersecting);
+}, { threshold: .02 }).observe($('#hero-product'));
 
 $$('.layer-control').forEach(b => b.addEventListener('click', () => {
   const index = Number(b.dataset.layer), layer = navigationLayers[index];
@@ -282,9 +379,8 @@ $$('.sources-open,[data-source]').forEach(b => b.addEventListener('click', () =>
 $('#assistant-open').addEventListener('click', () => openDialog('assistant-dialog'));
 $('#job-open').addEventListener('click', () => openDialog('job-dialog'));
 $('#accept-demo-task').addEventListener('click', () => {
-  $('#job-dialog').close(); updateWalk(0, true);
+  $('#job-dialog').close(); setEnvironment('grocery');
   $('#walkthrough').scrollIntoView({ behavior: motion ? 'smooth' : 'instant', block: 'start' });
-  if (motion) setPlaying(true); else updateWalk(.18, true);
 });
 dialogs.forEach(d => {
   $('.close-dialog', d).addEventListener('click', () => d.close());
@@ -309,5 +405,5 @@ const revealObserver = new IntersectionObserver(entries => entries.forEach(e => 
 $$('.section-heading, .thesis h2, .evidence-row, .navigation-lab, .scan-lab, .product-grid, .workflow-cards, .access-row').forEach(el => { el.classList.add('reveal'); revealObserver.observe(el); });
 function scrollProgress() { const height = document.documentElement.scrollHeight - innerHeight; $('.reading-progress').style.transform = `scaleX(${height > 0 ? scrollY / height : 0})`; }
 addEventListener('scroll', scrollProgress, { passive: true });
-addEventListener('pagehide', () => { if (frame) cancelAnimationFrame(frame); scene?.destroy(); productScene?.destroy(); });
+addEventListener('pagehide', () => { if (frame) cancelAnimationFrame(frame); scene?.destroy(); productScene?.destroy(); heroScene?.destroy(); environmentScene?.destroy(); });
 refreshIcons();

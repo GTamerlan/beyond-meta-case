@@ -1,10 +1,12 @@
-# Beyond / Work — Good work. Hands free.
+# Beyond / Work — Your work. In view.
 
 A work-first, interactive Meta-glasses strategy by Tamerlan Goglichidze for his YUCG application. Published at https://gtamerlan.github.io/beyond-meta-case/.
 
 ## The experience
 
-- A procedural 3D grocery store with a moving worker and shopping cart, six task stages, a scrubber, overhead and glasses-eye cameras, and optional AR guidance.
+- A first-person landing experience with three calm work environments: a grocery aisle, a delivery doorstep, and an electrician’s site visit. Each has three simple steps and one on-screen instruction; there is no autoplay, play/restart interface, or scroll trap.
+- The grocery camera moves smoothly between item-finding stops. Delivery and electrician views remain still between interactions. Electricians are explicitly a later-stage hypothesis, with job notes, verified references, and customer messages—not repair instructions.
+- An expandable “Explore the details” section keeps the main proposal short and focused. It includes black Wayfarer-style glasses with one selectable hologram at a time.
 - An indoor-navigation explainer separating approved partner data, store maps, future spatial tracking and deliberate confirmation.
 - A product-check simulation that rejects the wrong product. Replacement requires both simulated customer approval and explicit worker confirmation.
 - A black-glasses, companion-phone and optional-ring 3D system with selectable layers and drag interaction.
@@ -29,6 +31,6 @@ node --test test/work-state.test.js
 npm run build
 ```
 
-Vite builds to `dist/`, with relative asset URLs for GitHub Pages. The entry point is `src/work-page.js`; `src/work.css` owns the new visual system. The previous design's modules remain unreferenced in repository history/workspace and are not included in the app bundle.
+Vite builds to `dist/`, with relative asset URLs for GitHub Pages. The entry point is `src/work-page.js`; `src/work.css` and `src/work-landing.css` own the visual system. Scenes are lazy-loaded, and detailed labs remain collapsed initially. The previous design's modules remain unreferenced and are not included in the app bundle.
 
 The GitHub Actions workflow publishes pushes to `main`. The new social preview is a browser render of this site's own original 3D scene, not an image of a real deployment.
